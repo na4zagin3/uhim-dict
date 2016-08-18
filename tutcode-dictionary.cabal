@@ -19,6 +19,7 @@ executable tutcode-dictionary
   main-is:             Main.hs
   other-modules:       
     Dictionary.SKK.SKKExtended
+    Dictionary.Transform.TUTYomi
     Dictionary.Yaml
   -- other-extensions:    
   build-depends:       base >=4.8 && <4.9
