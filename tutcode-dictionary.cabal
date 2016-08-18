@@ -21,6 +21,7 @@ executable tutcode-dictionary
     Dictionary.SKK.SKKExtended
     Dictionary.Transform.TUTYomi
     Dictionary.Yaml
+    Dictionary.Yaml.Japanese.Verb
   -- other-extensions:    
   build-depends:       base >=4.8 && <4.9
                      , containers >=0.5 && <0.6
