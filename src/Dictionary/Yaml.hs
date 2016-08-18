@@ -25,6 +25,8 @@ import Data.Monoid
 -- import Text.Parsec
 import GHC.Generics
 
+import Dictionary.Yaml.Japanese.Verb
+
 type ShinKana = String
 type KyuKana = String
 
@@ -97,25 +99,7 @@ data WordDeclaration = WordDeclaration { word聯 :: [WordConvPair]
     deriving (Eq, Ord, Show, Read)
 deriveJSON defaultOptions{fieldLabelModifier = drop 4} ''WordDeclaration
 
-data JaVerbConjugation = JaVerbConjugation JaVerbStem JaVerbConjugation
-    deriving (Eq, Ord, Show, Read)
-
-data JaVerbStem = StemZero
-                | StemK | StemG
-                | StemS | StemZ
-                | StemT | StemD
-                | StemN
-                | StemF | StemB | StemP
-                | StemM
-                | StemY
-                | StemR
-                | StemW
-    deriving (Eq, Ord, Show, Read)
-
-data JaVerbClass = Quinquegrade | Quadrigrade | SuperMonograde | SuperBigrade | SubMonograde | SubBigrade | IrregularModern | IrregularClassic
-    deriving (Eq, Ord, Show, Read)
-
-data JaVerbDeclaration = JaVerbDeclaration { jaVerb類 :: [String]
+data JaVerbDeclaration = JaVerbDeclaration { jaVerb類 :: [JaVerbConjugation]
                                            , jaVerb聯 :: [WordConvPair]
                                            }
     deriving (Eq, Ord, Show, Read)
