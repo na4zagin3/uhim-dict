@@ -102,6 +102,11 @@ extractConvEntry c (Entry語 decl) = maybeToList $ do
   kys <- mapM (extractWordConvPair c) $ word聯 decl
   return $ WordConversion kys 1
 
+extractConvEntry c (Entry日動詞 decl) = maybeToList $ do
+  kys <- mapM (extractWordConvPair c) $ jaVerb聯 decl
+  let kys' = kys ++ [("", "—")] -- TODO monograde verbs
+  return $ WordConversion kys' 1
+
 extractWordConvPair :: ExtractConfig -> WordConvPair -> Maybe (Kanji, Kana)
 extractWordConvPair c (WordConvPair ks p) = do
   k <- kanjiExtractor c ks
