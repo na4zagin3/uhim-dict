@@ -22,6 +22,7 @@ import qualified Data.Yaml.Include as Y
 import Data.Aeson.TH
 import Data.Aeson.Types
 import Data.Monoid
+import Data.Maybe
 -- import Text.Parsec
 import GHC.Generics
 
@@ -29,6 +30,9 @@ import Dictionary.Yaml.Japanese.Verb
 
 type ShinKana = String
 type KyuKana = String
+
+type Kana = String
+type Kanji = String
 
 data JaYomi = NonChange String
             | Changed ShinKana KyuKana -- 新仮名遣 旧仮名遣
@@ -110,3 +114,47 @@ data DictEntry = Entry字 KanjiDeclaration
                | Entry日動詞 JaVerbDeclaration
     deriving (Show, Read, Eq, Ord)
 deriveJSON defaultOptions{constructorTagModifier = drop 5, sumEncoding = ObjectWithSingleField} ''DictEntry
+
+
+-- Utils
+convExtToTrad :: Char -> Char
+convExtToTrad '\x1b000' = 'エ'
+convExtToTrad '\x1b001' = 'え'
+convExtToTrad x = x
+
+extractShinKana :: JaYomi -> Maybe Kana
+extractShinKana (NonChange x) = Just x
+extractShinKana (Changed "" _) = Nothing
+extractShinKana (Changed x _) = Just x
+
+extractKyuKana :: JaYomi -> Maybe Kana
+extractKyuKana (NonChange x) = Just $ map convExtToTrad x
+extractKyuKana (Changed _ "") = Nothing
+extractKyuKana (Changed _ x) = Just $ map convExtToTrad x
+
+extractExtKyuKana :: JaYomi -> Maybe Kana
+extractExtKyuKana (NonChange x) = Just x
+extractExtKyuKana (Changed _ "") = Nothing
+extractExtKyuKana (Changed _ x) = Just x
+
+extractShinKanji :: KanjiShapes -> Maybe Kanji
+extractShinKanji (KanjiShapes vks) = mconcat $ map (`M.lookup` vks) [ shinKanjiKey
+                                                                    , jaKanjiKey
+                                                                    , commonKanjiKey
+                                                                    ]
+
+extractKyuKanji :: KanjiShapes -> Maybe Kanji
+extractKyuKanji (KanjiShapes vks) = mconcat $ map (`M.lookup` vks) [ kyuKanjiKey
+                                                                   , jaKanjiKey
+                                                                   , commonKanjiKey
+                                                                   ]
+
+
+extractJaPron :: Pron -> JaYomi
+extractJaPron (Pron (Just x) Nothing  Nothing)  = x
+extractJaPron (Pron Nothing  (Just x) Nothing)  = x
+extractJaPron (Pron Nothing  Nothing  (Just x)) = x
+extractJaPron x = error $ "extractJaPron: More than one pronunciation in " ++ show x
+
+extractJaProns :: Pron -> [JaYomi]
+extractJaProns pron = mapMaybe (\f -> f pron) [pron日呉, pron日漢, pron日訓]

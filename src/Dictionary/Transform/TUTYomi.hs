@@ -23,11 +23,9 @@ import Data.Aeson
 import Data.Aeson.TH
 import Data.Aeson.Types
 
-type ShinKana = String
 type KyuKana = String
-type Kana = String
+type ShinKana = String
 
-type Kanji = String
 type Frequency = Double
 
 data ConvEntry = KanjiConversion Kanji [Kana] Frequency
@@ -42,7 +40,7 @@ data ExtractConfig = ExtractConfig { yomiExtractor :: JaYomi -> Maybe Kana
                                    }
 
 defaultConfig :: ExtractConfig
-defaultConfig = ExtractConfig { yomiExtractor = extractKyuKana
+defaultConfig = ExtractConfig { yomiExtractor = extractExtKyuKana
                               , kanjiExtractor = extractKyuKanji
                               , kanjiStandardVariant = [ kyuKanjiKey
                                                        , jaKanjiKey
@@ -57,38 +55,6 @@ combinatorial (xs:xss) = concatMap (\x -> map (x :) (combinatorial xss)) xs
 
 expandConversion :: [(Kana, Kanji)] -> [String]
 expandConversion = drop 1 . map concat . combinatorial . map (\(x,y) -> [y,x])
-
-extractShinKana :: JaYomi -> Maybe Kana
-extractShinKana (NonChange x) = Just x
-extractShinKana (Changed "" _) = Nothing
-extractShinKana (Changed x _) = Just x
-
-extractKyuKana :: JaYomi -> Maybe Kana
-extractKyuKana (NonChange x) = Just x
-extractKyuKana (Changed _ "") = Nothing
-extractKyuKana (Changed _ x) = Just x
-
-extractShinKanji :: KanjiShapes -> Maybe Kanji
-extractShinKanji (KanjiShapes vks) = mconcat $ map (`M.lookup` vks) [ shinKanjiKey
-                                                                    , jaKanjiKey
-                                                                    , commonKanjiKey
-                                                                    ]
-
-extractKyuKanji :: KanjiShapes -> Maybe Kanji
-extractKyuKanji (KanjiShapes vks) = mconcat $ map (`M.lookup` vks) [ kyuKanjiKey
-                                                                   , jaKanjiKey
-                                                                   , commonKanjiKey
-                                                                   ]
-
-
-extractJaPron :: Pron -> JaYomi
-extractJaPron (Pron (Just x) Nothing  Nothing)  = x
-extractJaPron (Pron Nothing  (Just x) Nothing)  = x
-extractJaPron (Pron Nothing  Nothing  (Just x)) = x
-extractJaPron x = error $ "extractJaPron: More than one pronunciation in " ++ show x
-
-extractJaProns :: Pron -> [JaYomi]
-extractJaProns pron = mapMaybe (\f -> f pron) [pron日呉, pron日漢, pron日訓]
 
 extractConvEntry :: ExtractConfig -> DictEntry -> [ConvEntry]
 extractConvEntry c (Entry字 decl) = maybeToList $ pronConversion
