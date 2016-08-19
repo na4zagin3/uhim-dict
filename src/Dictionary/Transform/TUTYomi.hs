@@ -4,6 +4,7 @@
 module Dictionary.Transform.TUTYomi where
 
 import Dictionary.Yaml
+import Dictionary.Yaml.Japanese.Prim
 import Dictionary.SKK.SKKExtended (SKKDict)
 import qualified Dictionary.SKK.SKKExtended as SKK
 
