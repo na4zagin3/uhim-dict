@@ -22,7 +22,7 @@ empty = M.empty
 append :: Kana -> Kanji -> Frequency -> SKKDict -> SKKDict
 append yomi kanji freq = M.insertWith g yomi (M.singleton kanji freq)
     where
-      g = M.unionWith (+) -- ToDo: Frequency or Priority?
+      g = M.unionWith max -- ToDo: Frequency or Priority?
 
 emitSKKDictionary :: SKKDict -> String
 emitSKKDictionary = unlines . map f . M.toAscList

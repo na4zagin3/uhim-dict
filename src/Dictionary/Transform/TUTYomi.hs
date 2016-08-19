@@ -27,10 +27,10 @@ import Data.Aeson.Types
 type KyuKana = String
 type ShinKana = String
 
-type Frequency = Double
+type Priority = Double
 
-data ConvEntry = KanjiConversion Kanji [Kana] Frequency
-               | WordConversion [(Kanji, Kana)] Frequency
+data ConvEntry = KanjiConversion Kanji [Kana] Priority
+               | WordConversion [(Kanji, Kana)] Priority
     deriving (Show, Read, Eq, Ord)
 
 -- deriveJSON (defaultOptions {sumEncoding = ObjectWithSingleField}) ''ConvEntry
@@ -80,7 +80,7 @@ extractWordConvPair c (WordConvPair ks p) = do
   y <- yomiExtractor c $ extractJaPron p
   return (k, y)
 
-expandEntry :: ConvEntry -> [(String, Kanji, Frequency)]
+expandEntry :: ConvEntry -> [(String, Kanji, Priority)]
 expandEntry (KanjiConversion k ys f) = map (\y -> (y, k, f)) ys
 expandEntry (WordConversion kys f) = map fromConvStr . expandConversion . map extractKana $ kys
     where
