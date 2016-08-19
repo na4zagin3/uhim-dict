@@ -277,7 +277,7 @@ conjSuffixes SubMonograde = ["e"]
 conjSuffixes c = error $ "conjSuffixes: Unknown Verb Class " ++ show c
 
 -- TODO Implement irregular classes
-conjEndings :: JaVerbStem -> JaVerbClass -> [JaYomi]
-conjEndings s c@IrregularModern = error $ "conjEndings: Unknown Verb Class " ++ show s ++ " " ++ show c
-conjEndings s c@IrregularClassic = error $ "conjEndings: Unknown Verb Class " ++ show s ++ " " ++ show c
-conjEndings s c = map (conjEnding s) $ conjSuffixes c
+conjEndings :: JaVerbConjugation -> [JaYomi]
+conjEndings (JaVerbConjugation s c@IrregularModern) = error $ "conjEndings: Unknown Verb Class " ++ show s ++ " " ++ show c
+conjEndings (JaVerbConjugation s c@IrregularClassic) = error $ "conjEndings: Unknown Verb Class " ++ show s ++ " " ++ show c
+conjEndings (JaVerbConjugation s c) = map (conjEnding s) $ conjSuffixes c
