@@ -7,6 +7,8 @@ import qualified Data.Map as M
 import Data.Map (Map)
 import Data.Aeson.Types hiding (parse)
 
+import Dictionary.Yaml.Japanese.Prim
+
 data JaVerbConjugation = JaVerbConjugation JaVerbStem JaVerbClass
     deriving (Eq, Ord, Show, Read)
 
@@ -186,3 +188,96 @@ instance ToJSON JaVerbConjugation where
 instance FromJSON JaVerbConjugation where
     parseJSON (String v) = maybe (fail . T.unpack $ "Unknown Japanese verb class:" `mappend` v) pure . parse $ T.unpack v
     parseJSON v          = typeMismatch "JaYomi" v
+
+conjEnding :: JaVerbStem -> String -> JaYomi
+conjEnding StemZero "a" = NonChange "あ"
+conjEnding StemZero "i" = NonChange "い"
+conjEnding StemZero "u" = NonChange "う"
+conjEnding StemZero "e" = NonChange "え"
+conjEnding StemZero "o" = NonChange "お"
+conjEnding StemK "a" = NonChange "か"
+conjEnding StemK "i" = NonChange "き"
+conjEnding StemK "u" = NonChange "く"
+conjEnding StemK "e" = NonChange "け"
+conjEnding StemK "o" = NonChange "こ"
+conjEnding StemG "a" = NonChange "が"
+conjEnding StemG "i" = NonChange "ぎ"
+conjEnding StemG "u" = NonChange "ぐ"
+conjEnding StemG "e" = NonChange "げ"
+conjEnding StemG "o" = NonChange "ご"
+conjEnding StemS "a" = NonChange "さ"
+conjEnding StemS "i" = NonChange "し"
+conjEnding StemS "u" = NonChange "す"
+conjEnding StemS "e" = NonChange "せ"
+conjEnding StemS "o" = NonChange "そ"
+conjEnding StemZ "a" = NonChange "ざ"
+conjEnding StemZ "i" = NonChange "じ"
+conjEnding StemZ "u" = NonChange "ず"
+conjEnding StemZ "e" = NonChange "ぜ"
+conjEnding StemZ "o" = NonChange "ぞ"
+conjEnding StemT "a" = NonChange "た"
+conjEnding StemT "i" = NonChange "ち"
+conjEnding StemT "u" = NonChange "つ"
+conjEnding StemT "e" = NonChange "て"
+conjEnding StemT "o" = NonChange "と"
+conjEnding StemD "a" = NonChange "だ"
+conjEnding StemD "i" = NonChange "ぢ"
+conjEnding StemD "u" = NonChange "づ"
+conjEnding StemD "e" = NonChange "で"
+conjEnding StemD "o" = NonChange "ど"
+conjEnding StemN "a" = NonChange "な"
+conjEnding StemN "i" = NonChange "に"
+conjEnding StemN "u" = NonChange "ぬ"
+conjEnding StemN "e" = NonChange "ね"
+conjEnding StemN "o" = NonChange "の"
+conjEnding StemF "a" = Changed "わ" "は"
+conjEnding StemF "i" = Changed "い" "ひ"
+conjEnding StemF "u" = Changed "う" "ふ"
+conjEnding StemF "e" = Changed "え" "へ"
+conjEnding StemF "o" = Changed "お" "ほ"
+conjEnding StemB "a" = NonChange "ば"
+conjEnding StemB "i" = NonChange "び"
+conjEnding StemB "u" = NonChange "ぶ"
+conjEnding StemB "e" = NonChange "べ"
+conjEnding StemB "o" = NonChange "ぼ"
+conjEnding StemP "a" = NonChange "ぱ"
+conjEnding StemP "i" = NonChange "ぴ"
+conjEnding StemP "u" = NonChange "ぷ"
+conjEnding StemP "e" = NonChange "ぺ"
+conjEnding StemP "o" = NonChange "ぽ"
+conjEnding StemM "a" = NonChange "ま"
+conjEnding StemM "i" = NonChange "み"
+conjEnding StemM "u" = NonChange "む"
+conjEnding StemM "e" = NonChange "め"
+conjEnding StemM "o" = NonChange "も"
+conjEnding StemY "a" = NonChange "や"
+conjEnding StemY "i" = NonChange "い"
+conjEnding StemY "u" = NonChange "ゆ"
+conjEnding StemY "e" = Changed "え" "\x1b001"
+conjEnding StemY "o" = NonChange "よ"
+conjEnding StemR "a" = NonChange "ら"
+conjEnding StemR "i" = NonChange "り"
+conjEnding StemR "u" = NonChange "る"
+conjEnding StemR "e" = NonChange "れ"
+conjEnding StemR "o" = NonChange "ろ"
+conjEnding StemW "a" = NonChange "わ"
+conjEnding StemW "i" = Changed "い" "ゐ"
+conjEnding StemW "u" = NonChange "う"
+conjEnding StemW "e" = Changed "え" "ゑ"
+conjEnding StemW "o" = Changed "お" "を"
+conjEnding s v = error $ "conjEnding: Unknown Stem (" ++ show s ++ ") and vowel (" ++ v ++ ")"
+
+conjSuffixes :: JaVerbClass -> [String]
+conjSuffixes Quadrigrade = ["a", "i", "u", "e"]
+conjSuffixes Quinquegrade = ["a", "i", "u", "e", "o"]
+conjSuffixes SuperBigrade = ["i", "u"]
+conjSuffixes SuperMonograde = ["i"]
+conjSuffixes SubBigrade = ["e", "u"]
+conjSuffixes SubMonograde = ["e"]
+conjSuffixes c = error $ "conjSuffixes: Unknown Verb Class " ++ show c
+
+-- TODO Implement irregular classes
+conjEndings :: JaVerbStem -> JaVerbClass -> [JaYomi]
+conjEndings s c@IrregularModern = error $ "conjEndings: Unknown Verb Class " ++ show s ++ " " ++ show c
+conjEndings s c@IrregularClassic = error $ "conjEndings: Unknown Verb Class " ++ show s ++ " " ++ show c
+conjEndings s c = map (conjEnding s) $ conjSuffixes c
