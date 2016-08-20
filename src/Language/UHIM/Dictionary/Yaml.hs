@@ -88,6 +88,7 @@ deriveJSON defaultOptions{fieldLabelModifier = drop 4} ''WordDeclaration
 
 data JaVerbDeclaration = JaVerbDeclaration { jaVerb類 :: [JaVerbConjugation]
                                            , jaVerb聯 :: [WordConvPair]
+                                           , jaVerb頻度 :: Maybe Double
                                            , jaVerb簽 :: Maybe [String]
                                            }
     deriving (Eq, Ord, Show, Read)
@@ -95,6 +96,7 @@ deriveJSON defaultOptions{fieldLabelModifier = drop 6} ''JaVerbDeclaration
 
 data JaAdjDeclaration = JaAdjDeclaration { jaAdj類 :: [JaAdjConjugation]
                                          , jaAdj聯 :: [WordConvPair]
+                                         , jaAdj頻度 :: Maybe Double
                                          , jaAdj簽 :: Maybe [String]
                                          }
     deriving (Eq, Ord, Show, Read)
@@ -113,6 +115,12 @@ entryLabel (Entry字 decl) = kanji簽 decl
 entryLabel (Entry語 decl) = word簽 decl
 entryLabel (Entry日動詞 decl) = jaVerb簽 decl
 entryLabel (Entry日形容詞 decl) = jaAdj簽 decl
+
+frequency :: DictEntry -> Maybe Double
+frequency (Entry字 decl) = kanji頻度 decl
+frequency (Entry語 decl) = word頻度 decl
+frequency (Entry日動詞 decl) = jaVerb頻度 decl
+frequency (Entry日形容詞 decl) = jaAdj頻度 decl
 
 -- Utils
 convExtToTrad :: Char -> Char
