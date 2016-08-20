@@ -129,10 +129,10 @@ adjConvSuffixes JaAdjNari = ([NonChange ""], False)
 adjConvSuffixes JaAdjTari = ([NonChange ""], False)
 
 verbConvSuffixes :: JaVerbConjugation -> [JaYomi]
-verbConvSuffixes (JaVerbConjugation _ Quadrigrade) = []
-verbConvSuffixes (JaVerbConjugation _ Quinquegrade) = []
-verbConvSuffixes (JaVerbConjugation StemS IrregularClassic) = []
-verbConvSuffixes (JaVerbConjugation StemS IrregularModern) = []
+verbConvSuffixes (JaVerbConjugation _ Quadrigrade) = [NonChange ""]
+verbConvSuffixes (JaVerbConjugation _ Quinquegrade) = [NonChange ""]
+verbConvSuffixes (JaVerbConjugation StemS IrregularClassic) = [NonChange ""]
+verbConvSuffixes (JaVerbConjugation StemS IrregularModern) = [NonChange ""]
 verbConvSuffixes jvc = conjEndings jvc
 
 isRequiredOkurigana :: ExtractConfig -> JaVerbDeclaration -> Bool
