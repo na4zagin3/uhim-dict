@@ -16,6 +16,7 @@ executable tutcode-dictionary
   main-is:             Main.hs
   other-modules:       
     Language.UHIM.Japanese.Prim
+    Language.UHIM.Japanese.Adjective
     Language.UHIM.Japanese.Verb
     Language.UHIM.Dictionary.SKK.SKKExtended
     Language.UHIM.Dictionary.Yaml

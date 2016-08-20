@@ -4,6 +4,7 @@
 module Language.UHIM.Dictionary.Transform.TUTYomi where
 
 import Language.UHIM.Japanese.Prim
+import Language.UHIM.Japanese.Adjective
 import Language.UHIM.Japanese.Verb
 
 import Language.UHIM.Dictionary.Yaml
@@ -83,6 +84,12 @@ extractConvEntry c (Entry日動詞 decl) = do
   let okuri = if isRequiredOkurigana c decl then sufy else ""
   return $ VerbConversion kys (okuri, okuri ++ "—") 1
 
+extractConvEntry c (Entry日形容詞 decl) = do
+  (suf, conj) <- map adjConvSuffixes $ jaAdj類 decl
+  okuri <- catMaybes $ map (yomiExtractor c) suf
+  kys <- maybeToList . mapM (extractVerbWordConvPair c okuri) $ jaAdj聯 decl
+  return $ VerbConversion kys (okuri, okuri ++ if conj then "—" else "") 1
+
 extractWordConvPair :: ExtractConfig -> WordConvPair -> Maybe (Kanji, Kana)
 extractWordConvPair c (WordConvPair ks p) = do
   k <- kanjiExtractor c ks
@@ -109,6 +116,17 @@ extractSKK :: ExtractConfig -> [DictEntry] -> SKKDict
 extractSKK conf = foldr f SKK.empty . concatMap expandEntry . concatMap (extractConvEntry conf)
     where
       f (a,b,c) = SKK.append a b c
+
+adjConvSuffixes :: JaAdjConjugation -> ([JaYomi], Bool)
+adjConvSuffixes JaAdjSii = ([NonChange "し"], True)
+adjConvSuffixes JaAdjSiku = ([NonChange "し"], True)
+adjConvSuffixes JaAdjZii = ([NonChange "じ"], True)
+adjConvSuffixes JaAdjZiku = ([NonChange "じ"], True)
+adjConvSuffixes JaAdjI = ([NonChange ""], True)
+adjConvSuffixes JaAdjKu = ([NonChange ""], True)
+adjConvSuffixes JaAdjNa = ([NonChange ""], False)
+adjConvSuffixes JaAdjNari = ([NonChange ""], False)
+adjConvSuffixes JaAdjTari = ([NonChange ""], False)
 
 verbConvSuffixes :: JaVerbConjugation -> [JaYomi]
 verbConvSuffixes (JaVerbConjugation _ Quadrigrade) = []

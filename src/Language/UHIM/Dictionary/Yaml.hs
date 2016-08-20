@@ -28,7 +28,7 @@ import GHC.Generics
 
 import Language.UHIM.Japanese.Prim
 import Language.UHIM.Japanese.Verb
-
+import Language.UHIM.Japanese.Adjective
 
 data Pron = Pron { pron日漢 :: Maybe JaYomi
                  , pron日呉 :: Maybe JaYomi
@@ -90,9 +90,16 @@ data JaVerbDeclaration = JaVerbDeclaration { jaVerb類 :: [JaVerbConjugation]
     deriving (Eq, Ord, Show, Read)
 deriveJSON defaultOptions{fieldLabelModifier = drop 6} ''JaVerbDeclaration
 
+data JaAdjDeclaration = JaAdjDeclaration { jaAdj類 :: [JaAdjConjugation]
+                                         , jaAdj聯 :: [WordConvPair]
+                                         }
+    deriving (Eq, Ord, Show, Read)
+deriveJSON defaultOptions{fieldLabelModifier = drop 5} ''JaAdjDeclaration
+
 data DictEntry = Entry字 KanjiDeclaration
                | Entry語 WordDeclaration
                | Entry日動詞 JaVerbDeclaration
+               | Entry日形容詞 JaAdjDeclaration
     deriving (Show, Read, Eq, Ord)
 deriveJSON defaultOptions{constructorTagModifier = drop 5, sumEncoding = ObjectWithSingleField} ''DictEntry
 
