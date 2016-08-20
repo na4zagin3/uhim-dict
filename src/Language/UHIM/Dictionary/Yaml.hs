@@ -67,6 +67,7 @@ data KanjiDeclaration = KanjiDeclaration { kanji體 :: KanjiShapes
                                          , kanji義 :: Maybe [String]
                                          , kanji鍵 :: Maybe (Map String String)
                                          , kanji頻度 :: Maybe Double
+                                         , kanji簽 :: Maybe [String]
                                          }
     deriving (Eq, Ord, Show, Read)
 deriveJSON defaultOptions{fieldLabelModifier = drop 5} ''KanjiDeclaration
@@ -80,18 +81,21 @@ deriveJSON defaultOptions{fieldLabelModifier = drop 4} ''WordConvPair
 data WordDeclaration = WordDeclaration { word聯 :: [WordConvPair]
                                        , word義 :: Maybe [String]
                                        , word頻度 :: Maybe Double
+                                       , word簽 :: Maybe [String]
                                        }
     deriving (Eq, Ord, Show, Read)
 deriveJSON defaultOptions{fieldLabelModifier = drop 4} ''WordDeclaration
 
 data JaVerbDeclaration = JaVerbDeclaration { jaVerb類 :: [JaVerbConjugation]
                                            , jaVerb聯 :: [WordConvPair]
+                                           , jaVerb簽 :: Maybe [String]
                                            }
     deriving (Eq, Ord, Show, Read)
 deriveJSON defaultOptions{fieldLabelModifier = drop 6} ''JaVerbDeclaration
 
 data JaAdjDeclaration = JaAdjDeclaration { jaAdj類 :: [JaAdjConjugation]
                                          , jaAdj聯 :: [WordConvPair]
+                                         , jaAdj簽 :: Maybe [String]
                                          }
     deriving (Eq, Ord, Show, Read)
 deriveJSON defaultOptions{fieldLabelModifier = drop 5} ''JaAdjDeclaration
@@ -103,6 +107,12 @@ data DictEntry = Entry字 KanjiDeclaration
     deriving (Show, Read, Eq, Ord)
 deriveJSON defaultOptions{constructorTagModifier = drop 5, sumEncoding = ObjectWithSingleField} ''DictEntry
 
+
+entryLabel :: DictEntry -> Maybe [String]
+entryLabel (Entry字 decl) = kanji簽 decl
+entryLabel (Entry語 decl) = word簽 decl
+entryLabel (Entry日動詞 decl) = jaVerb簽 decl
+entryLabel (Entry日形容詞 decl) = jaAdj簽 decl
 
 -- Utils
 convExtToTrad :: Char -> Char
