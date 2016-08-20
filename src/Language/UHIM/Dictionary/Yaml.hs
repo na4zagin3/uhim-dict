@@ -63,7 +63,7 @@ deriveJSON defaultOptions ''KanjiShapes
 
 data KanjiDeclaration = KanjiDeclaration { kanji體 :: KanjiShapes
                                          , kanji音 :: [Pron]
-                                         , kanji形 :: [String]
+                                         , kanji形 :: Map String String
                                          , kanji義 :: Maybe [String]
                                          , kanji鍵 :: Maybe (Map String String)
                                          , kanji頻度 :: Maybe Double
