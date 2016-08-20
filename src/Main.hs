@@ -3,9 +3,10 @@
 {-# LANGUAGE DeriveGeneric #-}
 module Main where
 
-import Dictionary.SKK.SKKExtended (SKKDict)
-import qualified Dictionary.SKK.SKKExtended as SKK
-import Dictionary.Transform.TUTYomi as TTY
+import Language.UHIM.Dictionary.SKK.SKKExtended (SKKDict)
+import qualified Language.UHIM.Dictionary.SKK.SKKExtended as SKK
+import Language.UHIM.Dictionary.Transform.TUTYomi as TTY
+import Language.UHIM.Dictionary.Yaml
 
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BL
@@ -23,7 +24,6 @@ import Data.Aeson
 import Data.Aeson.TH
 import Data.Aeson.Types
 
-import Dictionary.Yaml
 
 
 main :: IO ()

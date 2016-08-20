@@ -1,4 +1,4 @@
-module Dictionary.SKK.SKKExtended ( SKKDict , SKKEntry
+module Language.UHIM.Dictionary.SKK.SKKExtended ( SKKDict , SKKEntry
                               , empty
                               , append
                               , emitSKKDictionary

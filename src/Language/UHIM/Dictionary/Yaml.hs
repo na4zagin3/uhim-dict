@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
-module Dictionary.Yaml where
+module Language.UHIM.Dictionary.Yaml where
 
 import qualified Data.Text as T
 import qualified Data.Map as M
@@ -26,8 +26,8 @@ import Data.Maybe
 -- import Text.Parsec
 import GHC.Generics
 
-import Dictionary.Yaml.Japanese.Prim
-import Dictionary.Yaml.Japanese.Verb
+import Language.UHIM.Japanese.Prim
+import Language.UHIM.Japanese.Verb
 
 
 data Pron = Pron { pron日漢 :: Maybe JaYomi

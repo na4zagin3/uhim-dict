@@ -1,13 +1,13 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Dictionary.Yaml.Japanese.Verb where
+module Language.UHIM.Japanese.Verb where
 
 import qualified Data.Text as T
 import qualified Data.Map as M
 import Data.Map (Map)
 import Data.Aeson.Types hiding (parse)
 
-import Dictionary.Yaml.Japanese.Prim
+import Language.UHIM.Japanese.Prim
 
 data JaVerbConjugation = JaVerbConjugation JaVerbStem JaVerbClass
     deriving (Eq, Ord, Show, Read)

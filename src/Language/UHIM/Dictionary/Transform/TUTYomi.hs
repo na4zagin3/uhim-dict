@@ -1,13 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
 
-module Dictionary.Transform.TUTYomi where
+module Language.UHIM.Dictionary.Transform.TUTYomi where
 
-import Dictionary.Yaml
-import Dictionary.Yaml.Japanese.Prim
-import Dictionary.Yaml.Japanese.Verb
-import Dictionary.SKK.SKKExtended (SKKDict)
-import qualified Dictionary.SKK.SKKExtended as SKK
+import Language.UHIM.Japanese.Prim
+import Language.UHIM.Japanese.Verb
+
+import Language.UHIM.Dictionary.Yaml
+import Language.UHIM.Dictionary.SKK.SKKExtended (SKKDict)
+import qualified Language.UHIM.Dictionary.SKK.SKKExtended as SKK
 
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BL

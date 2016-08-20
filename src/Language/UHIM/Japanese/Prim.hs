@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
-module Dictionary.Yaml.Japanese.Prim where
+module Language.UHIM.Japanese.Prim where
 
 import qualified Data.Text as T
 import Data.Monoid
