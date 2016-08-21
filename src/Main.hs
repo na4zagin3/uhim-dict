@@ -6,6 +6,7 @@ module Main where
 import Language.UHIM.Dictionary.SKK.SKKExtended (SKKDict)
 import qualified Language.UHIM.Dictionary.SKK.SKKExtended as SKK
 import Language.UHIM.Dictionary.Transform.TUTYomi as TTY
+import Language.UHIM.Dictionary.Transform.Variants as Var
 import Language.UHIM.Dictionary.Yaml
 
 import qualified Data.ByteString as BS
@@ -28,7 +29,7 @@ import Data.Aeson.Types
 
 main :: IO ()
 main = do
-  str <- Y.decodeEither' <$> BS.getContents
-  case str of
-    Left e -> print e
-    Right y -> putStrLn . SKK.emitSKKDictionary $ TTY.extractSKK TTY.defaultConfig y
+  str <- either (error . show) id . Y.decodeEither' <$> BS.getContents
+  let yomiDict = TTY.extractSKK TTY.defaultConfig str
+  let variantDict = Var.extractSKK Var.defaultConfig str
+  putStrLn . SKK.emitSKKDictionary $ SKK.union yomiDict variantDict

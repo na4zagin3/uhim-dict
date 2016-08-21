@@ -21,6 +21,7 @@ executable tutcode-dictionary
     Language.UHIM.Dictionary.SKK.SKKExtended
     Language.UHIM.Dictionary.Yaml
     Language.UHIM.Dictionary.Transform.TUTYomi
+    Language.UHIM.Dictionary.Transform.Variants
   -- other-extensions:    
   build-depends:       base >=4.8 && <4.9
                      , containers >=0.5 && <0.6

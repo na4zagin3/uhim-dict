@@ -1,5 +1,6 @@
 module Language.UHIM.Dictionary.SKK.SKKExtended ( SKKDict , SKKEntry
                               , empty
+                              , union
                               , append , append'
                               , emitSKKDictionary
                               ) where
@@ -27,9 +28,13 @@ append yomi kanji freq | yomi /= kanji = append' yomi kanji freq
 
 -- |Append the new entry into the dictionary.
 append' :: Kana -> Kanji -> Frequency -> SKKDict -> SKKDict
-append' yomi kanji freq = M.insertWith g yomi (M.singleton kanji freq)
-    where
-      g = M.unionWith max -- ToDo: Frequency or Priority?
+append' yomi kanji freq = M.insertWith unionEntry yomi (M.singleton kanji freq)
+
+union :: SKKDict -> SKKDict -> SKKDict
+union = M.unionWith unionEntry
+
+unionEntry :: SKKEntry -> SKKEntry -> SKKEntry
+unionEntry = M.unionWith max -- ToDo: Frequency or Priority?
 
 -- |Convert dictionary to string.
 emitSKKDictionary :: SKKDict -> String
