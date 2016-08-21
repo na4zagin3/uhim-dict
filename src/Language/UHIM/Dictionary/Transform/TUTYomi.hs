@@ -77,12 +77,14 @@ extractConvEntry c (Entry語 decl) = maybeToList $ do
   return $ WordConversion kys 1
 
 -- ToDo: 終止形と連用形は、句末に助詞を伴わず出現しうることへの対応
-extractConvEntry c (Entry日動詞 decl) = do
-  suf <- map verbConvSuffixes $ jaVerb類 decl
-  sufy <- catMaybes $ map (yomiExtractor c) suf
-  kys <- maybeToList . mapM (extractVerbWordConvPair c sufy) $ jaVerb聯 decl
-  let okuri = if isRequiredOkurigana c decl then sufy else ""
-  return $ VerbConversion kys (okuri, okuri ++ "—") 1
+extractConvEntry c (Entry日動詞 decl) = f verbConvSuffixes "—" ++ f verbConvFinalSuffixes ""
+  where
+    f getSuffixes conjMark = do
+      suf <- map getSuffixes $ jaVerb類 decl
+      sufy <- catMaybes $ map (yomiExtractor c) suf
+      kys <- maybeToList . mapM (extractVerbWordConvPair c sufy) $ jaVerb聯 decl
+      let okuri = if isRequiredOkurigana c decl then sufy else ""
+      return $ VerbConversion kys (okuri, okuri ++ conjMark) 1
 
 extractConvEntry c (Entry日形容詞 decl) = do
   (suf, conj) <- map adjConvSuffixes $ jaAdj類 decl
@@ -131,9 +133,16 @@ adjConvSuffixes JaAdjTari = ([NonChange ""], False)
 verbConvSuffixes :: JaVerbConjugation -> [JaYomi]
 verbConvSuffixes (JaVerbConjugation _ Quadrigrade) = [NonChange ""]
 verbConvSuffixes (JaVerbConjugation _ Quinquegrade) = [NonChange ""]
-verbConvSuffixes (JaVerbConjugation StemS IrregularClassic) = [NonChange ""]
-verbConvSuffixes (JaVerbConjugation StemS IrregularModern) = [NonChange ""]
+verbConvSuffixes (JaVerbConjugation StemS IrregularClassic) = []
+verbConvSuffixes (JaVerbConjugation StemS IrregularModern) = []
 verbConvSuffixes jvc = conjEndings jvc
+
+verbConvFinalSuffixes :: JaVerbConjugation -> [JaYomi]
+verbConvFinalSuffixes (JaVerbConjugation _ Quadrigrade) = []
+verbConvFinalSuffixes (JaVerbConjugation _ Quinquegrade) = []
+verbConvFinalSuffixes (JaVerbConjugation StemS IrregularClassic) = [NonChange ""]
+verbConvFinalSuffixes (JaVerbConjugation StemS IrregularModern) = [NonChange ""]
+verbConvFinalSuffixes jvc = conjEndings jvc
 
 isRequiredOkurigana :: ExtractConfig -> JaVerbDeclaration -> Bool
 isRequiredOkurigana c decl = f $ jaVerb聯 decl
