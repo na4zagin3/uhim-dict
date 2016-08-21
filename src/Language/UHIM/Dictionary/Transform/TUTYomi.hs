@@ -135,6 +135,8 @@ verbConvSuffixes (JaVerbConjugation _ Quadrigrade) = [NonChange ""]
 verbConvSuffixes (JaVerbConjugation _ Quinquegrade) = [NonChange ""]
 verbConvSuffixes (JaVerbConjugation StemS IrregularClassic) = []
 verbConvSuffixes (JaVerbConjugation StemS IrregularModern) = []
+verbConvSuffixes (JaVerbConjugation StemZ IrregularClassic) = []
+verbConvSuffixes (JaVerbConjugation StemZ IrregularModern) = []
 verbConvSuffixes jvc = conjEndings jvc
 
 verbConvFinalSuffixes :: JaVerbConjugation -> [JaYomi]
@@ -142,6 +144,14 @@ verbConvFinalSuffixes (JaVerbConjugation _ Quadrigrade) = []
 verbConvFinalSuffixes (JaVerbConjugation _ Quinquegrade) = []
 verbConvFinalSuffixes (JaVerbConjugation StemS IrregularClassic) = [NonChange ""]
 verbConvFinalSuffixes (JaVerbConjugation StemS IrregularModern) = [NonChange ""]
+verbConvFinalSuffixes (JaVerbConjugation StemZ IrregularClassic) = [NonChange ""]
+verbConvFinalSuffixes (JaVerbConjugation StemZ IrregularModern) = [NonChange ""]
+verbConvFinalSuffixes (JaVerbConjugation StemK IrregularClassic) = [NonChange "き", NonChange "く"]
+verbConvFinalSuffixes (JaVerbConjugation StemK IrregularModern) = [NonChange "き"]
+verbConvFinalSuffixes (JaVerbConjugation StemN IrregularClassic) = [NonChange "に", NonChange "ぬ"]
+verbConvFinalSuffixes (JaVerbConjugation StemN IrregularModern) = [NonChange "に", NonChange "ぬ"]
+verbConvFinalSuffixes (JaVerbConjugation StemR IrregularModern) = [NonChange "り"]
+verbConvFinalSuffixes (JaVerbConjugation StemR IrregularClassic) = [NonChange "り"]
 verbConvFinalSuffixes jvc = conjEndings jvc
 
 isRequiredOkurigana :: ExtractConfig -> JaVerbDeclaration -> Bool

@@ -72,6 +72,10 @@ jaVerbClasses = M.fromList . map (\(x, s, c) -> (x, JaVerbConjugation s c)) $ ls
          , ("ザ上一", StemZ, SuperMonograde)
          , ("ザ下二", StemZ, SubBigrade)
          , ("ザ下一", StemZ, SubMonograde)
+         , ("ザ變",   StemZ, IrregularModern)
+         , ("ザ変",   StemZ, IrregularModern)
+         , ("古ザ變", StemZ, IrregularClassic)
+         , ("古ザ変", StemZ, IrregularClassic)
 
          , ("タ四",   StemT, Quadrigrade)
          , ("タ五",   StemT, Quinquegrade)
@@ -267,17 +271,24 @@ conjEnding StemW "e" = Changed "え" "ゑ"
 conjEnding StemW "o" = Changed "お" "を"
 conjEnding s v = error $ "conjEnding: Unknown Stem (" ++ show s ++ ") and vowel (" ++ v ++ ")"
 
-conjSuffixes :: JaVerbClass -> [String]
-conjSuffixes Quadrigrade = ["a", "i", "u", "e"]
-conjSuffixes Quinquegrade = ["a", "i", "u", "e", "o"]
-conjSuffixes SuperBigrade = ["i", "u"]
-conjSuffixes SuperMonograde = ["i"]
-conjSuffixes SubBigrade = ["e", "u"]
-conjSuffixes SubMonograde = ["e"]
-conjSuffixes c = error $ "conjSuffixes: Unknown Verb Class " ++ show c
+conjSuffixes :: JaVerbStem -> JaVerbClass -> [String]
+conjSuffixes _ Quadrigrade = ["a", "i", "u", "e"]
+conjSuffixes _ Quinquegrade = ["a", "i", "u", "e", "o"]
+conjSuffixes _ SuperBigrade = ["i", "u"]
+conjSuffixes _ SuperMonograde = ["i"]
+conjSuffixes _ SubBigrade = ["e", "u"]
+conjSuffixes _ SubMonograde = ["e"]
+conjSuffixes StemK IrregularModern = ["o", "i", "u"]
+conjSuffixes StemK IrregularClassic = ["e", "i", "u"]
+conjSuffixes StemN IrregularModern = ["a", "i", "u", "e"]
+conjSuffixes StemN IrregularClassic = ["a", "i", "u", "e"]
+conjSuffixes StemS IrregularModern = ["i", "u", "e"]
+conjSuffixes StemS IrregularClassic = ["i", "u", "e"]
+conjSuffixes StemZ IrregularModern = ["i", "u", "e"]
+conjSuffixes StemZ IrregularClassic = ["i", "u", "e"]
+conjSuffixes StemR IrregularModern = ["a", "i", "u", "e"]
+conjSuffixes StemR IrregularClassic = ["a", "i", "u", "e"]
+conjSuffixes s c = error $ "conjSuffixes: Unknown Verb Class " ++ show (s, c)
 
--- TODO Implement irregular classes
 conjEndings :: JaVerbConjugation -> [JaYomi]
-conjEndings (JaVerbConjugation s c@IrregularModern) = error $ "conjEndings: Unknown Verb Class " ++ show s ++ " " ++ show c
-conjEndings (JaVerbConjugation s c@IrregularClassic) = error $ "conjEndings: Unknown Verb Class " ++ show s ++ " " ++ show c
-conjEndings (JaVerbConjugation s c) = map (conjEnding s) $ conjSuffixes c
+conjEndings (JaVerbConjugation s c) = map (conjEnding s) $ conjSuffixes s c
