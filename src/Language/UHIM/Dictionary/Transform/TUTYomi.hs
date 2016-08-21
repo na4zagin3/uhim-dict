@@ -65,32 +65,32 @@ expandConversion :: [(Kana, Kanji)] -> [String]
 expandConversion = drop 1 . map concat . combinatorial . map (\(x,y) -> [y,x])
 
 extractConvEntry :: ExtractConfig -> DictEntry -> [ConvEntry]
-extractConvEntry c (Entry字 decl) = maybeToList $ pronConversion
+extractConvEntry c ent@(Entry字 decl) = maybeToList $ pronConversion
   where
     pronConversion = do
       let ys = concatMap extractJaProns $ kanji音 decl
       k <- kanjiExtractor c $ kanji體 decl
-      return $ KanjiConversion k (mapMaybe (yomiExtractor c) ys) 1 -- ToDo: support frequency
+      return $ KanjiConversion k (mapMaybe (yomiExtractor c) ys) $ fromMaybe 1 $ frequency ent
 
-extractConvEntry c (Entry語 decl) = maybeToList $ do
+extractConvEntry c ent@(Entry語 decl) = maybeToList $ do
   kys <- mapM (extractWordConvPair c) $ word聯 decl
-  return $ WordConversion kys 1
+  return $ WordConversion kys $ fromMaybe 1 $ frequency ent
 
 -- ToDo: 終止形と連用形は、句末に助詞を伴わず出現しうることへの対応
-extractConvEntry c (Entry日動詞 decl) = f verbConvSuffixes "—" ++ f verbConvFinalSuffixes ""
+extractConvEntry c ent@(Entry日動詞 decl) = f verbConvSuffixes "—" ++ f verbConvFinalSuffixes ""
   where
     f getSuffixes conjMark = do
       suf <- map getSuffixes $ jaVerb類 decl
       sufy <- catMaybes $ map (yomiExtractor c) suf
       kys <- maybeToList . mapM (extractVerbWordConvPair c sufy) $ jaVerb聯 decl
       let okuri = if isRequiredOkurigana c decl then sufy else ""
-      return $ VerbConversion kys (okuri, okuri ++ conjMark) 1
+      return $ VerbConversion kys (okuri, okuri ++ conjMark) $ fromMaybe 1 $ frequency ent
 
-extractConvEntry c (Entry日形容詞 decl) = do
+extractConvEntry c ent@(Entry日形容詞 decl) = do
   (suf, conj) <- map adjConvSuffixes $ jaAdj類 decl
   okuri <- catMaybes $ map (yomiExtractor c) suf
   kys <- maybeToList . mapM (extractVerbWordConvPair c okuri) $ jaAdj聯 decl
-  return $ VerbConversion kys (okuri, okuri ++ if conj then "—" else "") 1
+  return $ VerbConversion kys (okuri, okuri ++ if conj then "—" else "") $ fromMaybe 1 $ frequency ent
 
 extractWordConvPair :: ExtractConfig -> WordConvPair -> Maybe (Kanji, Kana)
 extractWordConvPair c (WordConvPair ks p) = do
