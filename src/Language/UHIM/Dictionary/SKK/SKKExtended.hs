@@ -1,6 +1,6 @@
 module Language.UHIM.Dictionary.SKK.SKKExtended ( SKKDict , SKKEntry
                               , empty
-                              , append
+                              , append , append'
                               , emitSKKDictionary
                               ) where
 
@@ -16,14 +16,22 @@ type Frequency = Double
 type SKKEntry = Map String Frequency
 type SKKDict = Map String SKKEntry
 
+-- |Empty SKK Dictionary.
 empty :: SKKDict
 empty = M.empty
 
+-- |Append the new entry into the dictionary. It does not allow an idempotent entry
 append :: Kana -> Kanji -> Frequency -> SKKDict -> SKKDict
-append yomi kanji freq = M.insertWith g yomi (M.singleton kanji freq)
+append yomi kanji freq | yomi /= kanji = append' yomi kanji freq
+                       | otherwise = id
+
+-- |Append the new entry into the dictionary.
+append' :: Kana -> Kanji -> Frequency -> SKKDict -> SKKDict
+append' yomi kanji freq = M.insertWith g yomi (M.singleton kanji freq)
     where
       g = M.unionWith max -- ToDo: Frequency or Priority?
 
+-- |Convert dictionary to string.
 emitSKKDictionary :: SKKDict -> String
 emitSKKDictionary = unlines . map f . M.toAscList
     where
