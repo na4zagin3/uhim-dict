@@ -34,6 +34,8 @@ data Pron = Pron { pron日漢 :: Maybe JaYomi
                  , pron日呉 :: Maybe JaYomi
                  , pron日訓 :: Maybe JaYomi
                  , pron日慣用 :: Maybe JaYomi
+                 , pron日送 :: Maybe JaYomi
+                 , pron日迎 :: Maybe JaYomi
                  }
     deriving (Eq, Ord, Show, Read)
 deriveJSON defaultOptions{fieldLabelModifier = drop 4} ''Pron
@@ -51,12 +53,16 @@ instance FromJSON KanjiShapes where
     parseJSON (String v) = pure . KanjiShapes . M.fromList $ [(commonKanjiKey, T.unpack v)]
     parseJSON v          = typeMismatch "JaYomi" v
 
-commonKanjiKey, kyuKanjiKey, shinKanjiKey, kanyoKanjiKey, jaKanjiKey :: String
+commonKanjiKey, kyuKanjiKey, shinKanjiKey, jaKanjiKey :: String
 commonKanjiKey = "共通"
 kyuKanjiKey = "日舊"
 shinKanjiKey = "日新"
-kanyoKanjiKey = "日慣用"
 jaKanjiKey = "日"
+
+kanyoYomiKey, okuriYomiKey, mukaeYomiKey :: String
+kanyoYomiKey = "日慣用"
+okuriYomiKey = "日送"
+mukaeYomiKey = "日迎"
 
 {-
 
@@ -159,10 +165,12 @@ extractKyuKanji (KanjiShapes vks) = mconcat $ map (`M.lookup` vks) [ kyuKanjiKey
 
 
 extractJaPron :: Pron -> JaYomi
-extractJaPron (Pron (Just x) Nothing  Nothing  Nothing)  = x
-extractJaPron (Pron Nothing  (Just x) Nothing  Nothing)  = x
-extractJaPron (Pron Nothing  Nothing  (Just x) Nothing)  = x
-extractJaPron (Pron Nothing  Nothing  Nothing  (Just x)) = x
+extractJaPron (Pron (Just x) Nothing  Nothing  Nothing  Nothing  Nothing)  = x
+extractJaPron (Pron Nothing  (Just x) Nothing  Nothing  Nothing  Nothing)  = x
+extractJaPron (Pron Nothing  Nothing  (Just x) Nothing  Nothing  Nothing)  = x
+extractJaPron (Pron Nothing  Nothing  Nothing  (Just x) Nothing  Nothing)  = x
+extractJaPron (Pron Nothing  Nothing  Nothing  Nothing  (Just x) Nothing)  = x
+extractJaPron (Pron Nothing  Nothing  Nothing  Nothing  Nothing  (Just x)) = x
 extractJaPron x = error $ "extractJaPron: More than one pronunciation in " ++ show x
 
 extractJaProns :: Pron -> [JaYomi]
