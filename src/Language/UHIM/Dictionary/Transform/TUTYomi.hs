@@ -76,6 +76,10 @@ extractConvEntry c ent@(Entry語 decl) = maybeToList $ do
   kys <- mapM (extractWordConvPair c) $ word聯 decl
   return $ WordConversion kys $ fromMaybe 1 $ frequency ent
 
+extractConvEntry c ent@(Entry日副詞 decl) = maybeToList $ do
+  kys <- mapM (extractWordConvPair c) $ word聯 decl
+  return $ WordConversion kys $ fromMaybe 1 $ frequency ent
+
 extractConvEntry c ent@(Entry日動詞 decl) = f verbConvSuffixes "—" ++ f verbConvFinalSuffixes ""
   where
     f getSuffixes conjMark = do

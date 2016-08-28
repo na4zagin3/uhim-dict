@@ -14,14 +14,14 @@ import Data.Map (Map)
 -- import Data.String
 -- import Data.Char
 -- import qualified Data.Aeson as J
-import qualified Data.Yaml.Include as Y
+-- import qualified Data.Yaml.Include as Y
 -- import qualified Data.ByteString as BS
 -- import qualified Data.ByteString.UTF8 as BSU
 -- import qualified Data.ByteString.Lazy as BL
 -- import qualified Data.ByteString.Lazy.UTF8 as BLU
 import Data.Aeson.TH
 import Data.Aeson.Types
-import Data.Monoid
+-- import Data.Monoid
 import Data.Maybe
 -- import Text.Parsec
 import GHC.Generics
@@ -114,6 +114,7 @@ data DictEntry = Entry字 KanjiDeclaration
                | Entry語 WordDeclaration
                | Entry日動詞 JaVerbDeclaration
                | Entry日形容詞 JaAdjDeclaration
+               | Entry日副詞 WordDeclaration
     deriving (Show, Read, Eq, Ord)
 deriveJSON defaultOptions{constructorTagModifier = drop 5, sumEncoding = ObjectWithSingleField} ''DictEntry
 
@@ -123,12 +124,14 @@ entryLabel (Entry字 decl) = kanji簽 decl
 entryLabel (Entry語 decl) = word簽 decl
 entryLabel (Entry日動詞 decl) = jaVerb簽 decl
 entryLabel (Entry日形容詞 decl) = jaAdj簽 decl
+entryLabel (Entry日副詞 decl) = word簽 decl
 
 frequency :: DictEntry -> Maybe Double
 frequency (Entry字 decl) = kanji頻度 decl
 frequency (Entry語 decl) = word頻度 decl
 frequency (Entry日動詞 decl) = jaVerb頻度 decl
 frequency (Entry日形容詞 decl) = jaAdj頻度 decl
+frequency (Entry日副詞 decl) = word頻度 decl
 
 -- Utils
 convExtToTrad :: Char -> Char
