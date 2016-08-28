@@ -95,7 +95,7 @@ extractWordConvPair :: ExtractConfig -> WordConvPair -> Maybe (Kanji, Kana)
 extractWordConvPair c (WordConvPair ks p) = do
   k <- kanjiExtractor c ks
   y <- yomiExtractor c $ extractJaPron p
-  return (k, y)
+  return (if k == kanaMark then y else k, y)
 
 extractVerbWordConvPair :: ExtractConfig -> String -> WordConvPair -> Maybe (Kanji, Kana)
 extractVerbWordConvPair c suf cp = do
@@ -162,4 +162,7 @@ isRequiredOkurigana c decl = f $ jaVerb聯 decl
 
 nonOkuriganaMark :: String
 nonOkuriganaMark = "$"
+
+kanaMark :: String
+kanaMark = "$$"
 
