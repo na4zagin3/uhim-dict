@@ -70,7 +70,11 @@ kyuKanjiKey = "日舊"
 shinKanjiKey = "日新"
 jaKanjiKey = "日"
 
+kanYomiKey, goYomiKey, touYomiKey :: String
 kanyoYomiKey, okuriYomiKey, mukaeYomiKey :: String
+kanYomiKey = "日漢"
+goYomiKey = "日呉"
+touYomiKey = "日唐"
 kanyoYomiKey = "日慣用"
 okuriYomiKey = "日送"
 mukaeYomiKey = "日迎"
