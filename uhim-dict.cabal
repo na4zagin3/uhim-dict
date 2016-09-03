@@ -20,6 +20,7 @@ executable tutcode-dictionary
     Language.UHIM.Japanese.Verb
     Language.UHIM.Dictionary.SKK.SKKExtended
     Language.UHIM.Dictionary.Yaml
+    Language.UHIM.Dictionary.Yaml.Prim
     Language.UHIM.Dictionary.Transform.TUTYomi
     Language.UHIM.Dictionary.Transform.Variants
   -- other-extensions:    

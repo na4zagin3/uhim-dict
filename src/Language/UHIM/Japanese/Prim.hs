@@ -18,6 +18,8 @@ data JaYomi = NonChange String
     deriving (Show, Read, Eq, Ord, Generic)
 
 instance ToJSON JaYomi where
+    toJSON (NonChange str) = String $ T.pack str
+    toJSON (Changed shin kyu) = object ["新" .= shin, "舊" .= kyu]
     toEncoding (NonChange str) = toEncoding str
     toEncoding (Changed shin kyu) = pairs ("新" .= shin <> "舊" .= kyu)
 

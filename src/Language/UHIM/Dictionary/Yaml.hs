@@ -20,7 +20,8 @@ import Data.Map (Map)
 -- import qualified Data.ByteString.Lazy as BL
 -- import qualified Data.ByteString.Lazy.UTF8 as BLU
 import Data.Aeson.TH
-import Data.Aeson.Types
+import Data.Aeson.Types hiding (defaultOptions)
+import qualified Data.Aeson.Types as AE
 -- import Data.Monoid
 import Data.Maybe
 -- import Text.Parsec
@@ -29,16 +30,26 @@ import GHC.Generics
 import Language.UHIM.Japanese.Prim
 import Language.UHIM.Japanese.Verb
 import Language.UHIM.Japanese.Adjective
+import Language.UHIM.Dictionary.Yaml.Prim
 
-data Pron = Pron { pron日漢 :: Maybe JaYomi
-                 , pron日呉 :: Maybe JaYomi
+data Pron = Pron { pron日呉 :: Maybe JaYomi
+                 , pron日漢 :: Maybe JaYomi
                  , pron日訓 :: Maybe JaYomi
                  , pron日慣用 :: Maybe JaYomi
                  , pron日送 :: Maybe JaYomi
                  , pron日迎 :: Maybe JaYomi
                  }
     deriving (Eq, Ord, Show, Read)
-deriveJSON defaultOptions{fieldLabelModifier = drop 4} ''Pron
+deriveJSON jsonOptions{fieldLabelModifier = drop 4} ''Pron
+
+emptyPron :: Pron
+emptyPron = Pron { pron日漢 = Nothing
+                 , pron日呉 = Nothing
+                 , pron日訓 = Nothing
+                 , pron日慣用 = Nothing
+                 , pron日送 = Nothing
+                 , pron日迎 = Nothing
+                 }
 
 data KanjiShapes = KanjiShapes (Map String String)
     deriving (Eq, Ord, Show, Read, Generic)
@@ -78,13 +89,22 @@ data KanjiDeclaration = KanjiDeclaration { kanji體 :: KanjiShapes
                                          , kanji簽 :: Maybe [String]
                                          }
     deriving (Eq, Ord, Show, Read)
-deriveJSON defaultOptions{fieldLabelModifier = drop 5} ''KanjiDeclaration
+deriveJSON jsonOptions{fieldLabelModifier = drop 5} ''KanjiDeclaration
+emptyKanjiDeclaration :: KanjiDeclaration
+emptyKanjiDeclaration = KanjiDeclaration { kanji體 = KanjiShapes M.empty
+                                         , kanji音 = []
+                                         , kanji形 = Nothing
+                                         , kanji義 = Nothing
+                                         , kanji鍵 = Nothing
+                                         , kanji頻度 = Nothing
+                                         , kanji簽 = Nothing
+                                         }
 
 data WordConvPair = WordConvPair { word字 :: KanjiShapes
                                  , word讀 :: Pron
                                  }
     deriving (Eq, Ord, Show, Read)
-deriveJSON defaultOptions{fieldLabelModifier = drop 4} ''WordConvPair
+deriveJSON jsonOptions{fieldLabelModifier = drop 4} ''WordConvPair
 
 data WordDeclaration = WordDeclaration { word聯 :: [WordConvPair]
                                        , word義 :: Maybe [String]
@@ -92,7 +112,7 @@ data WordDeclaration = WordDeclaration { word聯 :: [WordConvPair]
                                        , word簽 :: Maybe [String]
                                        }
     deriving (Eq, Ord, Show, Read)
-deriveJSON defaultOptions{fieldLabelModifier = drop 4} ''WordDeclaration
+deriveJSON jsonOptions{fieldLabelModifier = drop 4} ''WordDeclaration
 
 data JaVerbDeclaration = JaVerbDeclaration { jaVerb類 :: [JaVerbConjugation]
                                            , jaVerb聯 :: [WordConvPair]
@@ -100,7 +120,7 @@ data JaVerbDeclaration = JaVerbDeclaration { jaVerb類 :: [JaVerbConjugation]
                                            , jaVerb簽 :: Maybe [String]
                                            }
     deriving (Eq, Ord, Show, Read)
-deriveJSON defaultOptions{fieldLabelModifier = drop 6} ''JaVerbDeclaration
+deriveJSON jsonOptions{fieldLabelModifier = drop 6} ''JaVerbDeclaration
 
 data JaAdjDeclaration = JaAdjDeclaration { jaAdj類 :: [JaAdjConjugation]
                                          , jaAdj聯 :: [WordConvPair]
@@ -108,7 +128,7 @@ data JaAdjDeclaration = JaAdjDeclaration { jaAdj類 :: [JaAdjConjugation]
                                          , jaAdj簽 :: Maybe [String]
                                          }
     deriving (Eq, Ord, Show, Read)
-deriveJSON defaultOptions{fieldLabelModifier = drop 5} ''JaAdjDeclaration
+deriveJSON jsonOptions{fieldLabelModifier = drop 5} ''JaAdjDeclaration
 
 data DictEntry = Entry字 KanjiDeclaration
                | Entry語 WordDeclaration
@@ -116,7 +136,7 @@ data DictEntry = Entry字 KanjiDeclaration
                | Entry日形容詞 JaAdjDeclaration
                | Entry日副詞 WordDeclaration
     deriving (Show, Read, Eq, Ord)
-deriveJSON defaultOptions{constructorTagModifier = drop 5, sumEncoding = ObjectWithSingleField} ''DictEntry
+deriveJSON jsonOptions{constructorTagModifier = drop 5, sumEncoding = ObjectWithSingleField} ''DictEntry
 
 
 entryLabel :: DictEntry -> Maybe [String]
