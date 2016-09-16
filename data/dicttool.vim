@@ -96,6 +96,8 @@ function! WordType(str)
 	return Verb("ラ上一, 文ラ上二")
   elseif a:str =~ '-.*れる$'
 	return Verb("ラ下一, 文ラ下二")
+  elseif a:str =~ '^[いきしちにひみりえけせてねへめれ]-る$'
+	return Verb("?")
   elseif a:str =~ '-.*る$'
 	return Verb("ラ五, 文ラ四")
 
