@@ -32,8 +32,8 @@ defaultBaseShapes (KanjiShapes ss) = maybeToList $ M.lookup kyuKanjiKey ss
 defaultFrequency :: Double
 defaultFrequency = 1.0
 
-extractKanjiShapes :: DictEntry -> Maybe (KanjiShapes, Double)
-extractKanjiShapes ent@(Entry字 decl) = Just $ (kanji體 decl, fromMaybe defaultFrequency $ frequency ent)
+extractKanjiShapes :: (Position, DictEntry) -> Maybe (KanjiShapes, Double)
+extractKanjiShapes (_, ent@(Entry字 decl)) = Just $ (kanji體 decl, fromMaybe defaultFrequency $ frequency ent)
 extractKanjiShapes _ = Nothing
 
 expandKanjiShapes :: ExtractConfig -> (KanjiShapes, Double) -> [(Kana, Kanji, Double)]
@@ -42,7 +42,7 @@ expandKanjiShapes c (ss@(KanjiShapes m), freq) = do
   (k, s) <- M.toList m
   maybeToList $ (\freq' -> (f, s, freq')) <$> shapePriority c freq k
 
-extractSKK :: ExtractConfig -> [DictEntry] -> SKKDict
+extractSKK :: ExtractConfig -> Dictionary -> SKKDict
 extractSKK conf dict = foldr f SKK.empty $ ykfs
   where
     ykfs = concatMap (catMaybes . mapM (expandKanjiShapes conf) . extractKanjiShapes) $ dict

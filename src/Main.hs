@@ -29,7 +29,7 @@ import Data.Aeson.Types
 
 main :: IO ()
 main = do
-  str <- either (error . show) id . Y.decodeEither' <$> BS.getContents
+  str <- either (error . show) id . readFromBS "-" <$> BS.getContents
   let yomiDict = TTY.extractSKK TTY.defaultConfig str
   let variantDict = Var.extractSKK Var.defaultConfig str
   putStrLn . SKK.emitSKKDictionary $ SKK.union yomiDict variantDict

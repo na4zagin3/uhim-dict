@@ -14,10 +14,11 @@ import Data.Map (Map)
 -- import Data.String
 -- import Data.Char
 -- import qualified Data.Aeson as J
--- import qualified Data.Yaml.Include as Y
--- import qualified Data.ByteString as BS
+import qualified Data.Yaml as Y
+import qualified Data.Yaml.Include as YI
+import qualified Data.ByteString as BS
 -- import qualified Data.ByteString.UTF8 as BSU
--- import qualified Data.ByteString.Lazy as BL
+import qualified Data.ByteString.Lazy as BL
 -- import qualified Data.ByteString.Lazy.UTF8 as BLU
 import Data.Aeson.TH
 import Data.Aeson.Types hiding (defaultOptions)
@@ -142,6 +143,19 @@ data DictEntry = Entry字 KanjiDeclaration
     deriving (Show, Read, Eq, Ord)
 deriveJSON jsonOptions{constructorTagModifier = drop 5, sumEncoding = ObjectWithSingleField} ''DictEntry
 
+type Position = [(String, Integer)]
+
+type Dictionary = [(Position, DictEntry)]
+
+readFromFile :: FilePath -> IO (Either Y.ParseException Dictionary)
+readFromFile fp = do
+  es <- YI.decodeFileEither fp
+  return $ fmap (map (\(i, x) -> ([(fp, i)], x)) . zip [0..]) es
+
+readFromBS :: String -> BS.ByteString -> Either Y.ParseException Dictionary
+readFromBS fp str = do
+  es <- Y.decodeEither' str
+  return $ map (\(i, x) -> ([(fp, i)], x)) $ zip [0..] es
 
 entryLabel :: DictEntry -> Maybe [String]
 entryLabel (Entry字 decl) = kanji簽 decl

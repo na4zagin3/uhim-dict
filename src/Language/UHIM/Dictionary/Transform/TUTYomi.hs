@@ -64,34 +64,34 @@ expandVerbConversion = map concat . combinatorial . map (\(x,y) -> [y,x])
 expandConversion :: [(Kana, Kanji)] -> [String]
 expandConversion = drop 1 . map concat . combinatorial . map (\(x,y) -> [y,x])
 
-extractConvEntry :: ExtractConfig -> DictEntry -> [ConvEntry]
-extractConvEntry c ent@(Entry字 decl) = maybeToList $ pronConversion
+extractConvEntry :: ExtractConfig -> (Position, DictEntry) -> [ConvEntry]
+extractConvEntry c (pos, ent@(Entry字 decl)) = maybeToList pronConversion
   where
     pronConversion = do
       let ys = concatMap extractJaProns $ kanji音 decl
       k <- kanjiExtractor c $ kanji體 decl
       return $ KanjiConversion k (mapMaybe (yomiExtractor c) ys) $ fromMaybe 1 $ frequency ent
 
-extractConvEntry c ent@(Entry語 decl) = maybeToList $ do
+extractConvEntry c (pos, ent@(Entry語 decl)) = maybeToList $ do
   kys <- mapM (extractWordConvPair c) $ word聯 decl
   return $ WordConversion kys $ fromMaybe 1 $ frequency ent
 
-extractConvEntry c ent@(Entry日副詞 decl) = maybeToList $ do
+extractConvEntry c (pos, ent@(Entry日副詞 decl)) = maybeToList $ do
   kys <- mapM (extractWordConvPair c) $ word聯 decl
   return $ WordConversion kys $ fromMaybe 1 $ frequency ent
 
-extractConvEntry c ent@(Entry日動詞 decl) = f verbConvSuffixes "—" ++ f verbConvFinalSuffixes ""
+extractConvEntry c (pos, ent@(Entry日動詞 decl)) = f verbConvSuffixes "—" ++ f verbConvFinalSuffixes ""
   where
     f getSuffixes conjMark = do
       suf <- map getSuffixes $ jaVerb類 decl
-      sufy <- catMaybes $ map (yomiExtractor c) suf
+      sufy <- mapMaybe (yomiExtractor c) suf
       kys <- maybeToList . mapM (extractVerbWordConvPair c sufy) $ jaVerb聯 decl
       let okuri = if isRequiredOkurigana c decl then sufy else ""
       return $ VerbConversion kys (okuri, okuri ++ conjMark) $ fromMaybe 1 $ frequency ent
 
-extractConvEntry c ent@(Entry日形容詞 decl) = do
+extractConvEntry c (pos, ent@(Entry日形容詞 decl)) = do
   (suf, conj) <- map adjConvSuffixes $ jaAdj類 decl
-  okuri <- catMaybes $ map (yomiExtractor c) suf
+  okuri <- mapMaybe (yomiExtractor c) suf
   kys <- maybeToList . mapM (extractVerbWordConvPair c okuri) $ jaAdj聯 decl
   return $ VerbConversion kys (okuri, okuri ++ if conj then "—" else "") $ fromMaybe 1 $ frequency ent
 
@@ -117,7 +117,7 @@ expandEntry (VerbConversion kys (sk, sy) f) = map fromConvStr . expandVerbConver
       extractKana (k, y) = (y, k)
       fromConvStr s = (s ++ sy, concatMap fst kys ++ sk, f)
 
-extractSKK :: ExtractConfig -> [DictEntry] -> SKKDict
+extractSKK :: ExtractConfig -> Dictionary -> SKKDict
 extractSKK conf = foldr f SKK.empty . concatMap expandEntry . concatMap (extractConvEntry conf)
     where
       f (a,b,c) = SKK.append a b c
