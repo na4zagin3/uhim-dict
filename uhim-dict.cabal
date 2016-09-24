@@ -24,6 +24,7 @@ executable uhim-dict
     Language.UHIM.Dictionary.Transform.TUTYomi
     Language.UHIM.Dictionary.Transform.Variants
     Language.UHIM.Dictionary.Source.Jion
+    Language.UHIM.Dictionary.Publish.LaTeX
   -- other-extensions:    
   build-depends:       base >=4.8 && <4.9
                      , containers >=0.5 && <0.6

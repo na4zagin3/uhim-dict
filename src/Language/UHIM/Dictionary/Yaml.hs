@@ -71,6 +71,21 @@ kyuKanjiKey = "日舊"
 shinKanjiKey = "日新"
 jaKanjiKey = "日"
 
+data ShapeClass = JaCommon
+                | JaTrad String
+                | JaSimp String
+                | Other String
+  deriving (Show, Read, Ord, Eq)
+
+readShapeKey :: String -> ShapeClass
+readShapeKey "日" = JaCommon
+readShapeKey ('日':'舊':v) = JaTrad v
+readShapeKey ('日':'新':v) = JaSimp v
+readShapeKey v = Other v
+
+defaultKanjiKeyOrder :: String -> String -> Ordering
+defaultKanjiKeyOrder x y = compare (readShapeKey x) (readShapeKey y)
+
 kanYomiKey, goYomiKey, touYomiKey :: String
 kanyoYomiKey, okuriYomiKey, mukaeYomiKey :: String
 kanYomiKey = "日漢"

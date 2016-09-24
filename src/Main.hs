@@ -6,6 +6,7 @@ module Main where
 import qualified Language.UHIM.Dictionary.SKK.SKKExtended as SKK
 import Language.UHIM.Dictionary.Transform.TUTYomi as TTY
 import Language.UHIM.Dictionary.Transform.Variants as Var
+import Language.UHIM.Dictionary.Publish.LaTeX as LaTeX
 import Language.UHIM.Dictionary.Yaml
 
 import qualified Data.ByteString as BS
@@ -26,12 +27,27 @@ data SKKYomiOptions = SKKYomiOptions { skkYomiOutputFile :: Maybe FilePath
 skkYomiOption :: Parser SKKYomiOptions
 skkYomiOption = SKKYomiOptions
                 <$> optional (strOption $ long "output"
+                                        <> short 'o'
+                                        <> metavar "FILE"
+                                        <> help "Output file"
+                                        )
+                <*> optional (argument str (metavar "FILE"))
+
+data LaTeXOptions = LaTeXOptions { latexOutputFile :: Maybe FilePath
+                                 , latexDictionary :: Maybe FilePath
+                                 }
+  deriving (Show, Read, Eq, Ord)
+latexOption :: Parser LaTeXOptions
+latexOption = LaTeXOptions
+                <$> optional (strOption $ long "output"
+                                        <> short 'o'
                                         <> metavar "FILE"
                                         <> help "Output file"
                                         )
                 <*> optional (argument str (metavar "FILE"))
 
 data Command = SKKYomi SKKYomiOptions
+             | LaTeX LaTeXOptions
   deriving (Show, Read, Eq, Ord)
 
 execCommand :: Command -> IO ()
@@ -46,10 +62,20 @@ execCommand (SKKYomi opt) = do
   case skkYomiOutputFile opt of
     Nothing -> putStrLn outputStr
     Just fp -> writeFile fp outputStr
+execCommand (LaTeX opt) = do
+  yds <- case latexDictionary opt of
+           Nothing -> readFromBS "-" <$> BS.getContents
+           Just fp -> readFromFile fp
+  let yamlDict = either (error . show) id yds
+  let outputStr = unlines $ LaTeX.emitDict yamlDict
+  case latexOutputFile opt of
+    Nothing -> putStrLn outputStr
+    Just fp -> writeFile fp outputStr
 
 opts :: Parser Command
 opts = subparser
-  ( command "skk-yomi" (info (SKKYomi <$> skkYomiOption) (progDesc "Generate SKK yomi dictionary")))
+  (  command "skk-yomi" (info (helper <*> (SKKYomi <$> skkYomiOption)) (progDesc "Generate SKK yomi dictionary"))
+  <> command "latex" (info (helper <*> (LaTeX <$> latexOption)) (progDesc "Generate LaTeX file")))
 
 main :: IO ()
 main = execParser progOpts >>= execCommand
