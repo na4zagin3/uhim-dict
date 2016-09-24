@@ -157,6 +157,12 @@ readFromBS fp str = do
   es <- Y.decodeEither' str
   return $ map (\(i, x) -> ([(fp, i)], x)) $ zip [0..] es
 
+writeToFile :: Dictionary -> FilePath -> IO ()
+writeToFile d fp = Y.encodeFile fp $ map snd d
+
+writeToBS :: Dictionary -> BS.ByteString
+writeToBS = Y.encode . map snd
+
 entryLabel :: DictEntry -> Maybe [String]
 entryLabel (Entry字 decl) = kanji簽 decl
 entryLabel (Entry語 decl) = word簽 decl
