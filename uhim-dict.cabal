@@ -11,6 +11,10 @@ category:            Language
 build-type:          Simple
 -- extra-source-files:  
 cabal-version:       >=1.10
+data-dir:
+  data
+data-files:
+  template/*.tex
 
 executable uhim-dict
   main-is:             Main.hs

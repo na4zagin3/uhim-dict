@@ -1,0 +1,21 @@
+\documentclass[a4paper]{ltjtarticle}
+% \documentclass[a4paper,landscape]{ltjsarticle}
+\usepackage{luatexja}
+\usepackage{luatexja-fontspec}
+% \usepackage[ipaex]{luatexja-preset}
+\usepackage[hiragino-pron]{luatexja-preset}
+\usepackage{luatexja-ruby}
+\usepackage{multicol}
+
+\setlength{\columnseprule}{0.4pt}
+
+\newcommand*{\HeadKanjiJaCommon}[1]{{\large 【#1】}}
+\newcommand*{\HeadKanjiJaTrad}[2][]{{\large 【#2】}}
+\newcommand*{\HeadKanjiJaSimp}[2][]{{\large 〖#2〗}}
+\newcommand*{\HeadKanjiOther}[2][]{{\large 〔#2〕}}
+
+\newcommand*{\HeadWord}[2][]{#1【#2】}
+\newcommand*{\HeadWordVariant}[2][]{（#2）}
+
+\newcommand{\EntrySep}{\par}
+\newcommand{\Position}[2]{{\rensuji[r]{\tiny #2}}}

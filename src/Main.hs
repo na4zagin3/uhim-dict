@@ -17,8 +17,10 @@ import qualified Data.ByteString as BS
 -- import Data.Map (Map)
 -- import qualified Data.List as L
 import Data.Monoid
+import Data.String
 import Options.Applicative
 
+import Paths_uhim_dict
 
 data SKKYomiOptions = SKKYomiOptions { skkYomiOutputFile :: Maybe FilePath
                                      , skkYomiDictionary :: Maybe FilePath
@@ -34,6 +36,7 @@ skkYomiOption = SKKYomiOptions
                 <*> optional (argument str (metavar "FILE"))
 
 data LaTeXOptions = LaTeXOptions { latexOutputFile :: Maybe FilePath
+                                 , latexTemplate :: Maybe FilePath
                                  , latexDictionary :: Maybe FilePath
                                  }
   deriving (Show, Read, Eq, Ord)
@@ -43,6 +46,10 @@ latexOption = LaTeXOptions
                                         <> short 'o'
                                         <> metavar "FILE"
                                         <> help "Output file"
+                                        )
+                <*> optional (strOption $ long "template"
+                                        <> metavar "FILE"
+                                        <> help "Template file"
                                         )
                 <*> optional (argument str (metavar "FILE"))
 
@@ -66,8 +73,13 @@ execCommand (LaTeX opt) = do
   yds <- case latexDictionary opt of
            Nothing -> readFromBS "-" <$> BS.getContents
            Just fp -> readFromFile fp
+  templFile <- case latexTemplate opt of
+                 Nothing -> getDataFileName "template/publish-latex.tex"
+                 Just x -> return x
+  templ <- readFile templFile
+  let conf = LaTeX.Config { LaTeX.template = templ }
   let yamlDict = either (error . show) id yds
-  let outputStr = unlines $ LaTeX.emitDict yamlDict
+  let outputStr = unlines $ LaTeX.emitDict conf yamlDict
   case latexOutputFile opt of
     Nothing -> putStrLn outputStr
     Just fp -> writeFile fp outputStr
