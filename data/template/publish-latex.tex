@@ -1,11 +1,26 @@
-\documentclass[a4paper]{ltjtarticle}
+\RequirePackage{ifxetex}
+\RequirePackage{ifluatex}
+\ifluatex%
+  \documentclass[a4paper]{ltjtarticle}
+\else%
+  \documentclass[a4paper]{utarticle}
+\fi
+
+\ifluatex%
+  \usepackage{luatexja}
+  \usepackage{luatexja-fontspec}
+  % \usepackage[ipaex]{luatexja-preset}
+  \usepackage[hiragino-pron]{luatexja-preset}
+  \usepackage{luatexja-ruby}
+\else\ifxetex%
+\else%
+  \usepackage{pxrubrica}
+\fi\fi
+
+%\documentclass[a4paper,twocolumn]{ltjtarticle}
 % \documentclass[a4paper,landscape]{ltjsarticle}
-\usepackage{luatexja}
-\usepackage{luatexja-fontspec}
-% \usepackage[ipaex]{luatexja-preset}
-\usepackage[hiragino-pron]{luatexja-preset}
-\usepackage{luatexja-ruby}
 \usepackage{multicol}
+\usepackage{xparse}
 
 \setlength{\columnseprule}{0.4pt}
 
@@ -18,4 +33,18 @@
 \newcommand*{\HeadWordVariant}[2][]{（#2）}
 
 \newcommand{\EntrySep}{\par}
-\newcommand{\Position}[2]{{\rensuji[r]{\tiny #2}}}
+\newcommand{\Position}[2]{\leavevmode\llap{\rensuji[r]{\tiny #2}}}
+
+\NewDocumentCommand{\KanjiYomiElem}{m o m}{
+  #1\ #3
+  \IfValueT{#2}
+    {（#2）}
+}
+
+\ifluatex%
+  \newcommand{\YomiUnit}[1]{#1\par}
+  \newenvironment{Yomi}{}{\hspace*{1\fill} ・\hspace*{1\fill}\par}
+\else%
+  \newcommand*{\YomiUnit}{\item}
+  \newenvironment{Yomi}{\begin{itemize}}{\end{itemize}}
+\fi

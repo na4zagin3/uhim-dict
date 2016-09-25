@@ -28,12 +28,38 @@ emitHeadKanjiShapes (KanjiShapes ks) = fromString . unwords $ map (uncurry emitH
     maps = sort . map (first readShapeKey) $ M.toList ks
 
 headWordKanji :: (IsString s) => (JaYomi -> Maybe Kana) -> (KanjiShapes -> Maybe Kanji) -> WordConvPair -> s
-headWordKanji extYomi extKanji kp = fromString . f . extYomi . extractJaPron $ word讀 kp
+headWordKanji extYomi extKanji kp = fromString . f kanji . extYomi . extractJaPron $ word讀 kp
   where
     kanji = fromMaybe "" $ extKanji $ word字 kp
-    f Nothing = kanji
-    f (Just y) = "\\ltjruby{" ++ kanji ++ "}{" ++ y ++ "}"
+    f k Nothing = k
+    f "$$" (Just y) = y
+    f k (Just y) = "\\ruby{" ++ fromString k ++ "}{" ++ y ++ "}"
 
+kanjiYomiElem :: (IsString s, Monoid s) => (String, JaYomi) -> s
+kanjiYomiElem (key, NonChange y) = mconcat [ "\\KanjiYomiElem{"
+                                           , fromString key
+                                           , "}{"
+                                           , fromString y
+                                           , "}"
+                                           ]
+kanjiYomiElem (key, Changed n t) = mconcat [ "\\KanjiYomiElem{"
+                                           , fromString key
+                                           , "}["
+                                           , fromString n
+                                           , "]{"
+                                           , fromString t
+                                           , "}"
+                                           ]
+
+kanjiYomi :: (IsString s, Monoid s) => Config -> [Pron] -> s
+kanjiYomi _ [] = ""
+kanjiYomi c ps = mconcat [ "\\begin{Yomi}\n"
+                         , mconcat . mconcat $ map f ps
+                         , "\\end{Yomi}"
+                         ]
+  where
+    f :: (IsString s, Monoid s) => Pron -> [s]
+    f = (\x -> ["\\YomiUnit{", x, "}\n"]) . mconcat . intersperse (fromString $ yomiSeparator c) . map kanjiYomiElem . extractJaPronList
 
 headWord :: (IsString s, Eq s) => [WordConvPair] -> [s]
 headWord wcp = concat [ ["\\HeadWord[語]{"]
@@ -53,36 +79,42 @@ headWord wcp = concat [ ["\\HeadWord[語]{"]
 emitPosition :: (IsString s, Monoid s, Eq s) => Position -> s
 emitPosition = mconcat . mconcat . map (\(f,p) -> [ "\\Position{", fromString f, "}{", fromString $ show p, "}"])
 
-emitEntry :: (IsString s, Monoid s, Eq s) => (Position, DictEntry) -> s
-emitEntry (pos, Entry字 decl) = mconcat [ emitPosition pos
-                              , emitHeadKanjiShapes shapes
-                              ]
-  where
-    shapes = kanji體 decl
+emitEntry :: (IsString s, Monoid s, Eq s) => Config -> (Position, DictEntry) -> s
+emitEntry c (pos, Entry字 decl) = mconcat [ emitPosition pos
+                                          , "\n"
+                                          , emitHeadKanjiShapes $ kanji體 decl
+                                          , "\n"
+                                          , kanjiYomi c $ kanji音 decl
+                                          ]
 
+emitEntry c (pos, Entry語 decl) = mconcat [ emitPosition pos
+                                          , "\n"
+                                          , mconcat $ headWord $ word聯 decl
+                                          , "\n"
+                                          ]
 
-emitEntry (pos, Entry語 decl) = mconcat [ emitPosition pos
-                              , mconcat $ headWord $ word聯 decl
-                              ]
-
-emitEntry (pos, Entry日動詞 decl) = ""
-emitEntry (pos, Entry日形容詞 decl) = ""
-emitEntry (pos, Entry日副詞 decl) = ""
+emitEntry c (pos, Entry日動詞 decl) = ""
+emitEntry c (pos, Entry日形容詞 decl) = ""
+emitEntry c (pos, Entry日副詞 decl) = ""
 
 data Config = Config { template :: String
+                     , multicols :: (String, String)
+                     , yomiSeparator :: String
                      }
 
 defaultConfig :: Config
 defaultConfig = Config { template = ""
+                       , multicols = ("\\begin{multicols*}{5}\n", "\\end{multicols*}\n")
+                       , yomiSeparator = "\\\\"
                        }
 
 emitDict :: (IsString s, Monoid s, Eq s) => Config -> Dictionary -> [s]
 emitDict c ds  = [ fromString $ template c
                  , "\n"
                  , "\\begin{document}\n"
-                 , "\\begin{multicols}{5}\n"
-                 , mconcat $ map ((mappend "\\EntrySep\n"). emitEntry) ds
+                 , fromString . fst $ multicols c
+                 , mconcat $ map (mappend "\\EntrySep\n". emitEntry c) ds
                  , "\n"
-                 , "\\end{multicols}\n"
+                 , fromString . snd $ multicols c
                  , "\\end{document}"
                  ]

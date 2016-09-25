@@ -77,7 +77,7 @@ execCommand (LaTeX opt) = do
                  Nothing -> getDataFileName "template/publish-latex.tex"
                  Just x -> return x
   templ <- readFile templFile
-  let conf = LaTeX.Config { LaTeX.template = templ }
+  let conf = LaTeX.defaultConfig { LaTeX.template = templ }
   let yamlDict = either (error . show) id yds
   let outputStr = unlines $ LaTeX.emitDict conf yamlDict
   case latexOutputFile opt of

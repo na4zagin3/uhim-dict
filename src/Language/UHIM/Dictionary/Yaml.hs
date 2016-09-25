@@ -226,6 +226,15 @@ extractKyuKanji (KanjiShapes vks) = mconcat $ map (`M.lookup` vks) [ kyuKanjiKey
                                                                    ]
 
 
+extractJaPronList :: Pron -> [(String, JaYomi)]
+extractJaPronList p@Pron{pron日漢 = Just x}  =  ("日漢", x) : extractJaPronList (p {pron日漢 = Nothing})
+extractJaPronList p@Pron{pron日呉 = Just x}  =  ("日呉", x) : extractJaPronList (p {pron日呉 = Nothing})
+extractJaPronList p@Pron{pron日慣用 = Just x}  =  ("日慣用", x) : extractJaPronList (p {pron日慣用 = Nothing})
+extractJaPronList p@Pron{pron日訓 = Just x}  =  ("日呉", x) : extractJaPronList (p {pron日訓 = Nothing})
+extractJaPronList p@Pron{pron日送 = Just x}  =  ("日送", x) : extractJaPronList (p {pron日送 = Nothing})
+extractJaPronList p@Pron{pron日迎 = Just x}  =  ("日迎", x) : extractJaPronList (p {pron日迎 = Nothing})
+extractJaPronList _  =  []
+
 extractJaPron :: Pron -> JaYomi
 extractJaPron (Pron (Just x) Nothing  Nothing  Nothing  Nothing  Nothing)  = x
 extractJaPron (Pron Nothing  (Just x) Nothing  Nothing  Nothing  Nothing)  = x
