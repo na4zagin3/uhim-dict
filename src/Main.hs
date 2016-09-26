@@ -17,6 +17,7 @@ import qualified Data.Yaml as Y
 -- import qualified Data.Map as M
 -- import Data.Map (Map)
 -- import qualified Data.List as L
+import Data.Either
 import Data.Maybe
 import Data.Monoid
 
@@ -29,7 +30,7 @@ import System.FilePath
 import Paths_uhim_dict
 
 data SKKYomiOptions = SKKYomiOptions { skkYomiOutputFile :: Maybe FilePath
-                                     , skkYomiDictionary :: Maybe FilePath
+                                     , skkYomiDictionaries :: [FilePath]
                                      }
   deriving (Show, Read, Eq, Ord)
 skkYomiOption :: Parser SKKYomiOptions
@@ -39,11 +40,11 @@ skkYomiOption = SKKYomiOptions
                                         <> metavar "FILE"
                                         <> help "Output file"
                                         )
-                <*> optional (argument str (metavar "FILE"))
+                <*> many (argument str (metavar "FILE..."))
 
 data LaTeXOptions = LaTeXOptions { latexOutputFile :: Maybe FilePath
                                  , latexTemplate :: Maybe FilePath
-                                 , latexDictionary :: Maybe FilePath
+                                 , latexDictionaries :: [FilePath]
                                  }
   deriving (Show, Read, Eq, Ord)
 latexOption :: Parser LaTeXOptions
@@ -57,11 +58,11 @@ latexOption = LaTeXOptions
                                         <> metavar "FILE"
                                         <> help "Template file"
                                         )
-                <*> optional (argument str (metavar "FILE"))
+                <*> many (argument str (metavar "FILE..."))
 
 data TcvimeOptions = TcvimeOptions { tcvimeOutputDirectory :: Maybe FilePath
                                    , tcvimeLayoutName :: String
-                                   , tcvimeDictionary :: Maybe FilePath
+                                   , tcvimeDictionaries :: [FilePath]
                                    }
   deriving (Show, Read, Eq, Ord)
 tcvimeOption :: Parser TcvimeOptions
@@ -74,7 +75,7 @@ tcvimeOption = TcvimeOptions
                 <*> strOption ( long "name"
                              <> metavar "NAME"
                              <> help "Layout name")
-                <*> optional (argument str (metavar "FILE"))
+                <*> many (argument str (metavar "FILE..."))
 
 data Command = SKKYomi SKKYomiOptions
              | LaTeX LaTeXOptions
@@ -83,8 +84,8 @@ data Command = SKKYomi SKKYomiOptions
 
 execCommand :: Command -> IO ()
 execCommand (SKKYomi opt) = do
-  yds <- readDictionary $ skkYomiDictionary opt
-  let yamlDict = either (error . show) id yds
+  yds <- readDictionary $ skkYomiDictionaries opt
+  let yamlDict = either error id yds
   let yomiDict = TTY.extractSKK TTY.defaultConfig yamlDict
   let variantDict = Var.extractSKK Var.defaultConfig yamlDict
   let outputStr = SKK.emitSKKDictionary $ SKK.union yomiDict variantDict
@@ -92,28 +93,35 @@ execCommand (SKKYomi opt) = do
     Nothing -> putStrLn outputStr
     Just fp -> writeFile fp outputStr
 execCommand (LaTeX opt) = do
-  yds <- readDictionary $ latexDictionary opt
+  yds <- readDictionary $ latexDictionaries opt
   templFile <- case latexTemplate opt of
                  Nothing -> getDataFileName "template/publish-latex.tex"
                  Just x -> return x
   templ <- readFile templFile
-  let yamlDict = either (error . show) id yds
+  let yamlDict = either error id yds
   let conf = LaTeX.defaultConfig { LaTeX.template = templ }
   let outputStr = unlines $ LaTeX.emitDict conf yamlDict
   case latexOutputFile opt of
     Nothing -> putStrLn outputStr
     Just fp -> writeFile fp outputStr
 execCommand (Tcvime opt) = do
-  yds <- readDictionary $ tcvimeDictionary opt
-  let yamlDict = either (error . show) id yds
+  yds <- readDictionary $ tcvimeDictionaries opt
+  let yamlDict = either error id yds
   let conf = TV.defaultConfig { TV.name = tcvimeLayoutName opt }
   let dir = fromMaybe "." $ tcvimeOutputDirectory opt
   let fss = map (first (dir </>)) $ TV.extract conf yamlDict
   forM_ fss (uncurry writeFile)
 
-readDictionary :: Maybe FilePath -> IO (Either Y.ParseException Dictionary)
-readDictionary Nothing = readFromBS "-" <$> BS.getContents
-readDictionary (Just fp) = readFromFile fp
+readDictionary :: [FilePath] -> IO (Either String Dictionary)
+readDictionary [] = do
+  d <- readFromBS "-" <$> BS.getContents
+  return . (Y.prettyPrintParseException +++ id) $ d
+readDictionary fps = do
+  ds <- mapM readFromFile fps :: IO [Either Y.ParseException Dictionary]
+  let (errs, dicts) = partitionEithers ds
+  if null errs
+    then return . Right $ mconcat dicts
+    else return . Left . unlines $ map Y.prettyPrintParseException errs
 
 opts :: Parser Command
 opts = subparser
