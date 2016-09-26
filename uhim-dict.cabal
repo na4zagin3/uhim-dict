@@ -25,7 +25,9 @@ executable uhim-dict
     Language.UHIM.Dictionary.SKK.SKKExtended
     Language.UHIM.Dictionary.Yaml
     Language.UHIM.Dictionary.Yaml.Prim
+    Language.UHIM.Dictionary.Keybind.Vim
     Language.UHIM.Dictionary.Transform.TUTYomi
+    Language.UHIM.Dictionary.Transform.Tcvime
     Language.UHIM.Dictionary.Transform.Variants
     Language.UHIM.Dictionary.Source.Jion
     Language.UHIM.Dictionary.Publish.LaTeX
@@ -43,6 +45,7 @@ executable uhim-dict
                      , utf8-string >=1.0 && <1.1
                      , cassava >=0.4 && <0.5
                      , optparse-applicative >= 0.12 && < 0.13
+                     , filepath >= 1.4 && < 1.5
 
   hs-source-dirs:      src
   default-language:    Haskell2010
