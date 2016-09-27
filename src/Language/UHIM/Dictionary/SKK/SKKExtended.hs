@@ -1,4 +1,5 @@
 module Language.UHIM.Dictionary.SKK.SKKExtended ( SKKDict , SKKEntry
+                              , Config(..), defaultConfig
                               , empty
                               , union
                               , append , append'
@@ -36,17 +37,26 @@ union = M.unionWith unionEntry
 unionEntry :: SKKEntry -> SKKEntry -> SKKEntry
 unionEntry = M.unionWith max -- ToDo: Frequency or Priority?
 
+data Config = Config { outputFrequency :: Bool
+                     }
+
+defaultConfig :: Config
+defaultConfig = Config { outputFrequency = False }
+
 -- |Convert dictionary to string.
-emitSKKDictionary :: SKKDict -> String
-emitSKKDictionary = unlines . map f . M.toAscList
+emitSKKDictionary :: Config -> SKKDict -> String
+emitSKKDictionary c = unlines . map f . M.toAscList
     where
-      f (yomi, ks) = mconcat [yomi, "\t", emitSKKEntry ks]
+      f (yomi, ks) = mconcat [yomi, " ", emitSKKEntry c ks]
 
-emitSKKEntry :: SKKEntry -> String
-emitSKKEntry = (\x -> "/" ++ x ++ "/") . L.intercalate "/" . concatMap emitSKKCandidate . L.sortOn snd . M.toList
+emitSKKEntry :: Config -> SKKEntry -> String
+emitSKKEntry c = (\x -> "/" ++ x ++ "/") . L.intercalate "/" . concatMap (emitSKKCandidate c). L.sortOn snd . M.toList
 
-emitSKKCandidate :: (Kanji, Frequency) -> [String]
-emitSKKCandidate (k, f) = return $ escapeSKKCandidate k ++ "; " ++ show f
+emitSKKCandidate :: Config -> (Kanji, Frequency) -> [String]
+emitSKKCandidate c (k, f) = return $ escapeSKKCandidate k ++ comments
+  where
+    comments | outputFrequency c = "; " ++ show f
+             | otherwise = ""
 
 escapeSKKCandidate :: String -> String
 escapeSKKCandidate s | any (`elem` "/();") s = error $ "escapeSKKCandidate: Not yet supported string: " ++ show s

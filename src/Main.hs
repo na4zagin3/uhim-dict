@@ -30,6 +30,7 @@ import System.FilePath
 import Paths_uhim_dict
 
 data SKKYomiOptions = SKKYomiOptions { skkYomiOutputFile :: Maybe FilePath
+                                     , skkYomiOutputComments :: Bool
                                      , skkYomiDictionaries :: [FilePath]
                                      }
   deriving (Show, Read, Eq, Ord)
@@ -40,6 +41,10 @@ skkYomiOption = SKKYomiOptions
                                         <> metavar "FILE"
                                         <> help "Output file"
                                         )
+                <*> flag False True ( long "comments"
+                                   <> short 'c'
+                                   <> help "Output comments for each elements."
+                                    )
                 <*> many (argument str (metavar "FILE..."))
 
 data LaTeXOptions = LaTeXOptions { latexOutputFile :: Maybe FilePath
@@ -88,7 +93,8 @@ execCommand (SKKYomi opt) = do
   let yamlDict = either error id yds
   let yomiDict = TTY.extractSKK TTY.defaultConfig yamlDict
   let variantDict = Var.extractSKK Var.defaultConfig yamlDict
-  let outputStr = SKK.emitSKKDictionary $ SKK.union yomiDict variantDict
+  let config = SKK.defaultConfig { SKK.outputFrequency = skkYomiOutputComments opt }
+  let outputStr = SKK.emitSKKDictionary config $ SKK.union yomiDict variantDict
   case skkYomiOutputFile opt of
     Nothing -> putStrLn outputStr
     Just fp -> writeFile fp outputStr
