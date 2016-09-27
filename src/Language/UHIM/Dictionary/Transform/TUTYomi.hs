@@ -41,6 +41,7 @@ data ConvEntry = KanjiConversion Kanji [Kana] Priority
 data ExtractConfig = ExtractConfig { yomiExtractor :: JaYomi -> Maybe Kana
                                    , kanjiExtractor :: KanjiShapes -> Maybe Kanji
                                    , kanjiStandardVariant :: [String]
+                                   , inflectionMark :: String
                                    }
 
 defaultConfig :: ExtractConfig
@@ -50,7 +51,20 @@ defaultConfig = ExtractConfig { yomiExtractor = extractExtKyuKana
                                                        , jaKanjiKey
                                                        , commonKanjiKey
                                                        ]
+                              , inflectionMark = tcvimeInflectionMark
                               }
+
+uimDefaultConfig :: ExtractConfig
+uimDefaultConfig = defaultConfig { inflectionMark = uimInflectionMark }
+
+tcvimeDefaultConfig :: ExtractConfig
+tcvimeDefaultConfig = defaultConfig { inflectionMark = tcvimeInflectionMark }
+
+uimInflectionMark :: String
+uimInflectionMark = "\x2014"
+
+tcvimeInflectionMark :: String
+tcvimeInflectionMark = "\x2015"
 
 combinatorial :: [[a]] -> [[a]]
 combinatorial [] = []
@@ -79,8 +93,9 @@ extractConvEntry c (pos, ent@(Entry日副詞 decl)) = maybeToList $ do
   kys <- mapM (extractWordConvPair c) $ word聯 decl
   return $ WordConversion kys $ fromMaybe 1 $ frequency ent
 
-extractConvEntry c (pos, ent@(Entry日動詞 decl)) = f verbConvSuffixes "—" ++ f verbConvFinalSuffixes ""
+extractConvEntry c (pos, ent@(Entry日動詞 decl)) = f verbConvSuffixes iMark ++ f verbConvFinalSuffixes ""
   where
+    iMark = inflectionMark c
     f getSuffixes conjMark = do
       suf <- map getSuffixes $ jaVerb類 decl
       sufy <- mapMaybe (yomiExtractor c) suf
@@ -89,10 +104,11 @@ extractConvEntry c (pos, ent@(Entry日動詞 decl)) = f verbConvSuffixes "—" +
       return $ VerbConversion kys (okuri, okuri ++ conjMark) $ fromMaybe 1 $ frequency ent
 
 extractConvEntry c (pos, ent@(Entry日形容詞 decl)) = do
+  let iMark = inflectionMark c
   (suf, conj) <- map adjConvSuffixes $ jaAdj類 decl
   okuri <- mapMaybe (yomiExtractor c) suf
   kys <- maybeToList . mapM (extractVerbWordConvPair c okuri) $ jaAdj聯 decl
-  return $ VerbConversion kys (okuri, okuri ++ if conj then "—" else "") $ fromMaybe 1 $ frequency ent
+  return $ VerbConversion kys (okuri, okuri ++ if conj then iMark else "") $ fromMaybe 1 $ frequency ent
 
 extractWordConvPair :: ExtractConfig -> WordConvPair -> Maybe (Kanji, Kana)
 extractWordConvPair c (WordConvPair ks p) = do
