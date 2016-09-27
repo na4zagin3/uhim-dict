@@ -29,7 +29,12 @@ import System.FilePath
 
 import Paths_uhim_dict
 
+data SKKYomiTarget = Tcvime
+                   | Uim
+  deriving (Show, Read, Eq, Ord)
+
 data SKKYomiOptions = SKKYomiOptions { skkYomiOutputFile :: Maybe FilePath
+                                     , skkYomiOutputTarget :: Maybe SKKYomiTarget
                                      , skkYomiOutputComments :: Bool
                                      , skkYomiDictionaries :: [FilePath]
                                      }
@@ -40,6 +45,11 @@ skkYomiOption = SKKYomiOptions
                                         <> short 'o'
                                         <> metavar "FILE"
                                         <> help "Output file"
+                                        )
+                <*> optional (option auto $ long "target"
+                                        <> short 't'
+                                        <> metavar "TARGET"
+                                        <> help "Output target, one of Tcvime and Uim"
                                         )
                 <*> flag False True ( long "comments"
                                    <> short 'c'
@@ -82,23 +92,27 @@ tcvimeOption = TcvimeOptions
                              <> help "Layout name")
                 <*> many (argument str (metavar "FILE..."))
 
-data Command = SKKYomi SKKYomiOptions
-             | LaTeX LaTeXOptions
-             | Tcvime TcvimeOptions
+data Command = CommandSKKYomi SKKYomiOptions
+             | CommandLaTeX LaTeXOptions
+             | CommandTcvime TcvimeOptions
   deriving (Show, Read, Eq, Ord)
 
 execCommand :: Command -> IO ()
-execCommand (SKKYomi opt) = do
+execCommand (CommandSKKYomi opt) = do
   yds <- readDictionary $ skkYomiDictionaries opt
   let yamlDict = either error id yds
-  let yomiDict = TTY.extractSKK TTY.defaultConfig yamlDict
+  let ttyConfig = case skkYomiOutputTarget opt of
+        (Just Uim) -> TTY.uimDefaultConfig
+        (Just Tcvime) -> TTY.tcvimeDefaultConfig
+        Nothing -> TTY.uimDefaultConfig
+  let yomiDict = TTY.extractSKK ttyConfig yamlDict
   let variantDict = Var.extractSKK Var.defaultConfig yamlDict
-  let config = SKK.defaultConfig { SKK.outputFrequency = skkYomiOutputComments opt }
+  let config =  SKK.defaultConfig { SKK.outputFrequency = skkYomiOutputComments opt }
   let outputStr = SKK.emitSKKDictionary config $ SKK.union yomiDict variantDict
   case skkYomiOutputFile opt of
     Nothing -> putStrLn outputStr
     Just fp -> writeFile fp outputStr
-execCommand (LaTeX opt) = do
+execCommand (CommandLaTeX opt) = do
   yds <- readDictionary $ latexDictionaries opt
   templFile <- case latexTemplate opt of
                  Nothing -> getDataFileName "template/publish-latex.tex"
@@ -110,7 +124,7 @@ execCommand (LaTeX opt) = do
   case latexOutputFile opt of
     Nothing -> putStrLn outputStr
     Just fp -> writeFile fp outputStr
-execCommand (Tcvime opt) = do
+execCommand (CommandTcvime opt) = do
   yds <- readDictionary $ tcvimeDictionaries opt
   let yamlDict = either error id yds
   let conf = TV.defaultConfig { TV.name = tcvimeLayoutName opt }
@@ -131,9 +145,9 @@ readDictionary fps = do
 
 opts :: Parser Command
 opts = subparser
-  (  command "skk-yomi" (info (helper <*> (SKKYomi <$> skkYomiOption)) (progDesc "Generate SKK yomi dictionary"))
-  <> command "latex" (info (helper <*> (LaTeX <$> latexOption)) (progDesc "Generate LaTeX file"))
-  <> command "tcvime" (info (helper <*> (Tcvime <$> tcvimeOption)) (progDesc "Generate Tcvime files")))
+  (  command "skk-yomi" (info (helper <*> (CommandSKKYomi <$> skkYomiOption)) (progDesc "Generate SKK yomi dictionary"))
+  <> command "latex" (info (helper <*> (CommandLaTeX <$> latexOption)) (progDesc "Generate LaTeX file"))
+  <> command "tcvime" (info (helper <*> (CommandTcvime <$> tcvimeOption)) (progDesc "Generate Tcvime files")))
 
 main :: IO ()
 main = execParser progOpts >>= execCommand
