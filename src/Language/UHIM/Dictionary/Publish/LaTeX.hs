@@ -14,12 +14,12 @@ import qualified Data.Map as M
 import Control.Arrow
 
 emitHeadKanji :: ShapeClass -> String -> String
-emitHeadKanji JaCommon k = "\\HeadKanjiJaCommon" ++ "{" ++ k ++ "}"
-emitHeadKanji (JaTrad []) k = "\\HeadKanjiJaTrad" ++ "{" ++ k ++ "}"
-emitHeadKanji (JaTrad v) k = "\\HeadKanjiJaTrad" ++ "[" ++ v ++ "]" ++ "{" ++ k ++ "}"
-emitHeadKanji (JaSimp []) k = "\\HeadKanjiJaSimp" ++ "{" ++ k ++ "}"
-emitHeadKanji (JaSimp v) k = "\\HeadKanjiJaSimp" ++ "[" ++ v ++ "]" ++ "{" ++ k ++ "}"
-emitHeadKanji (Other v) k = "\\HeadKanjiOther" ++ "[" ++ v ++ "]" ++ "{" ++ k ++ "}"
+emitHeadKanji JaCommon k = "\\HeadKanjiJaCommon" ++ "{" ++ escape k ++ "}"
+emitHeadKanji (JaTrad []) k = "\\HeadKanjiJaTrad" ++ "{" ++ escape k ++ "}"
+emitHeadKanji (JaTrad v) k = "\\HeadKanjiJaTrad" ++ "[" ++ escape v ++ "]" ++ "{" ++ escape k ++ "}"
+emitHeadKanji (JaSimp []) k = "\\HeadKanjiJaSimp" ++ "{" ++ escape k ++ "}"
+emitHeadKanji (JaSimp v) k = "\\HeadKanjiJaSimp" ++ "[" ++ escape v ++ "]" ++ "{" ++ escape k ++ "}"
+emitHeadKanji (Other v) k = "\\HeadKanjiOther" ++ "[" ++ escape v ++ "]" ++ "{" ++ escape k ++ "}"
 
 emitHeadKanjiShapes :: (IsString s) => KanjiShapes -> s
 emitHeadKanjiShapes (KanjiShapes ks) = fromString . unwords $ map (uncurry emitHeadKanji) maps
@@ -33,21 +33,21 @@ headWordKanji extYomi extKanji kp = fromString . f kanji . extYomi . extractJaPr
     kanji = fromMaybe "" $ extKanji $ word字 kp
     f k Nothing = k
     f "$$" (Just y) = y
-    f k (Just y) = "\\ruby{" ++ fromString k ++ "}{" ++ y ++ "}"
+    f k (Just y) = "\\ruby{" ++ escape k ++ "}{" ++ escape y ++ "}"
 
 kanjiYomiElem :: (IsString s, Monoid s) => (String, JaYomi) -> s
 kanjiYomiElem (key, NonChange y) = mconcat [ "\\KanjiYomiElem{"
-                                           , fromString key
+                                           , escape key
                                            , "}{"
-                                           , fromString y
+                                           , escape y
                                            , "}"
                                            ]
 kanjiYomiElem (key, Changed n t) = mconcat [ "\\KanjiYomiElem{"
-                                           , fromString key
+                                           , escape key
                                            , "}["
-                                           , fromString n
+                                           , escape n
                                            , "]{"
-                                           , fromString t
+                                           , escape t
                                            , "}"
                                            ]
 
@@ -74,10 +74,10 @@ headWord wcp = concat [ ["\\HeadWord[語]{"]
     trad = map (headWordKanji extractExtKyuKana extractKyuKanji) wcp
     simp = map (headWordKanji extractShinKana extractShinKanji) wcp
     maps :: [(ShapeClass, String)]
-    maps = sort . map (first readShapeKey) $ M.toList undefined 
+    maps = sort . map (first readShapeKey) $ M.toList undefined
 
 emitPosition :: (IsString s, Monoid s, Eq s) => Position -> s
-emitPosition = mconcat . mconcat . map (\(f,p) -> [ "\\Position{", fromString f, "}{", fromString $ show p, "}"])
+emitPosition = mconcat . mconcat . map (\(f,p) -> [ "\\Position{", escape f, "}{", escape $ show p, "}"])
 
 emitEntry :: (IsString s, Monoid s, Eq s) => Config -> (Position, DictEntry) -> s
 emitEntry c (pos, Entry字 decl) = mconcat [ emitPosition pos
@@ -118,3 +118,18 @@ emitDict c ds  = [ fromString $ template c
                  , fromString . snd $ multicols c
                  , "\\end{document}"
                  ]
+
+escapeChar :: IsString s => Char -> s
+escapeChar '\\' = "\\textbackslash "
+escapeChar '$' = "\\$"
+escapeChar '%' = "\\%"
+escapeChar '#' = "\\#"
+escapeChar '{' = "\\{"
+escapeChar '}' = "\\}"
+escapeChar '&' = "\\&"
+escapeChar '_' = "\\_"
+escapeChar '^' = "\\^"
+escapeChar c = fromString [c]
+
+escape :: (IsString s) => String -> s
+escape = fromString . concatMap escapeChar
