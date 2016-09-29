@@ -61,6 +61,18 @@ kanjiYomi c ps = mconcat [ "\\begin{Yomi}\n"
     f :: (IsString s, Monoid s) => Pron -> [s]
     f = (\x -> ["\\YomiUnit{", x, "}\n"]) . mconcat . intersperse (fromString $ yomiSeparator c) . map kanjiYomiElem . extractJaPronList
 
+meaning :: (IsString s, Monoid s) => Config -> [String] -> s
+meaning _ [] = ""
+meaning _ [s] = mconcat [ "\\begin{MeaningSg}\n"
+                        , escape s
+                        , "\\end{MeaningSg}\n"
+                        ]
+meaning _ ss = mconcat [ "\\begin{MeaningPl}\n"
+                       , mconcat $ map (\s -> mconcat ["\\Meaning{", escape s, "}\n"]) ss
+                       , "\\end{MeaningPl}\n"
+                       ]
+
+
 headWord :: (IsString s, Eq s) => [WordConvPair] -> [s]
 headWord wcp = concat [ ["\\HeadWord[語]{"]
                       , trad
@@ -85,12 +97,15 @@ emitEntry c (pos, Entry字 decl) = mconcat [ emitPosition pos
                                           , emitHeadKanjiShapes $ kanji體 decl
                                           , "\n"
                                           , kanjiYomi c $ kanji音 decl
+                                          , "\n"
+                                          , fromMaybe "" (meaning c <$> kanji義 decl)
                                           ]
 
 emitEntry c (pos, Entry語 decl) = mconcat [ emitPosition pos
                                           , "\n"
                                           , mconcat $ headWord $ word聯 decl
                                           , "\n"
+                                          , fromMaybe "" (meaning c <$> word義 decl)
                                           ]
 
 emitEntry c (pos, Entry日動詞 decl) = ""
@@ -113,11 +128,16 @@ emitDict c ds  = [ fromString $ template c
                  , "\n"
                  , "\\begin{document}\n"
                  , fromString . fst $ multicols c
-                 , mconcat $ map (mappend "\\EntrySep\n". emitEntry c) ds
+                 , mconcat $ map (entryEnv . emitEntry c) ds
                  , "\n"
                  , fromString . snd $ multicols c
                  , "\\end{document}"
                  ]
+  where
+    entryEnv s = mconcat [ "\\begin{Entry}\n"
+                         , s
+                         ,  "\\end{Entry}\n"
+                         ]
 
 escapeChar :: IsString s => Char -> s
 escapeChar '\\' = "\\textbackslash "

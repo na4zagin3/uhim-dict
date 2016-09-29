@@ -32,7 +32,7 @@
 \newcommand*{\HeadWord}[2][]{#1【#2】}
 \newcommand*{\HeadWordVariant}[2][]{（#2）}
 
-\newcommand{\EntrySep}{\par}
+\newenvironment{Entry}{}{\par}
 \newcommand{\Position}[2]{\leavevmode\llap{\rensuji[r]{\tiny #2}}}
 
 \NewDocumentCommand{\KanjiYomiElem}{m o m}{
@@ -47,4 +47,14 @@
 \else%
   \newcommand*{\YomiUnit}{\item}
   \newenvironment{Yomi}{\begin{itemize}}{\end{itemize}}
+\fi
+
+\ifluatex%
+  \newcommand{\Meaning}[1]{#1\par}
+  \newenvironment{MeaningSg}{}{}
+  \newenvironment{MeaningPl}{}{}
+\else%
+  \newcommand*{\Meaning}{\item}
+  \newenvironment{MeaningSg}{}{}
+  \newenvironment{MeaningPl}{\begin{itemize}}{\end{itemize}}
 \fi
