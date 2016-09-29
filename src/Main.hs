@@ -7,6 +7,7 @@ import qualified Language.UHIM.Dictionary.SKK.SKKExtended as SKK
 import Language.UHIM.Dictionary.Transform.TUTYomi as TTY
 import Language.UHIM.Dictionary.Transform.Variants as Var
 import Language.UHIM.Dictionary.Transform.Tcvime as TV
+import Language.UHIM.Dictionary.Transform.TcEl as TE
 import Language.UHIM.Dictionary.Publish.LaTeX as LaTeX
 import Language.UHIM.Dictionary.Yaml
 
@@ -92,9 +93,27 @@ tcvimeOption = TcvimeOptions
                              <> help "Layout name")
                 <*> many (argument str (metavar "FILE..."))
 
+data TcElOptions = TcElOptions { tcElOutputDirectory :: Maybe FilePath
+                               , tcElLayoutName :: String
+                               , tcElDictionaries :: [FilePath]
+                               }
+  deriving (Show, Read, Eq, Ord)
+tcElOption :: Parser TcElOptions
+tcElOption = TcElOptions
+                <$> optional (strOption $ long "outputdir"
+                                        <> short 'd'
+                                        <> metavar "DIR"
+                                        <> help "Output directory"
+                                        )
+                <*> strOption ( long "name"
+                             <> metavar "NAME"
+                             <> help "Layout name")
+                <*> many (argument str (metavar "FILE..."))
+
 data Command = CommandSKKYomi SKKYomiOptions
              | CommandLaTeX LaTeXOptions
              | CommandTcvime TcvimeOptions
+             | CommandTcEl TcElOptions
   deriving (Show, Read, Eq, Ord)
 
 execCommand :: Command -> IO ()
@@ -131,6 +150,13 @@ execCommand (CommandTcvime opt) = do
   let dir = fromMaybe "." $ tcvimeOutputDirectory opt
   let fss = map (first (dir </>)) $ TV.extract conf yamlDict
   forM_ fss (uncurry writeFile)
+execCommand (CommandTcEl opt) = do
+  yds <- readDictionary $ tcElDictionaries opt
+  let yamlDict = either error id yds
+  let conf = TE.defaultConfig { TE.name = tcElLayoutName opt }
+  let dir = fromMaybe "." $ tcElOutputDirectory opt
+  let fss = map (first (dir </>)) $ TE.extract conf yamlDict
+  forM_ fss (uncurry writeFile)
 
 readDictionary :: [FilePath] -> IO (Either String Dictionary)
 readDictionary [] = do
@@ -147,7 +173,8 @@ opts :: Parser Command
 opts = subparser
   (  command "skk-yomi" (info (helper <*> (CommandSKKYomi <$> skkYomiOption)) (progDesc "Generate SKK yomi dictionary"))
   <> command "latex" (info (helper <*> (CommandLaTeX <$> latexOption)) (progDesc "Generate LaTeX file"))
-  <> command "tcvime" (info (helper <*> (CommandTcvime <$> tcvimeOption)) (progDesc "Generate Tcvime files")))
+  <> command "tcvime" (info (helper <*> (CommandTcvime <$> tcvimeOption)) (progDesc "Generate Tcvime files"))
+  <> command "tcel" (info (helper <*> (CommandTcEl <$> tcElOption)) (progDesc "Generate Tc.el files")))
 
 main :: IO ()
 main = execParser progOpts >>= execCommand

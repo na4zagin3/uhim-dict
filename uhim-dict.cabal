@@ -26,7 +26,9 @@ executable uhim-dict
     Language.UHIM.Dictionary.Yaml
     Language.UHIM.Dictionary.Yaml.Prim
     Language.UHIM.Dictionary.Keybind.Vim
+    Language.UHIM.Dictionary.Keybind.TcEl
     Language.UHIM.Dictionary.Transform.TUTYomi
+    Language.UHIM.Dictionary.Transform.TcEl
     Language.UHIM.Dictionary.Transform.Tcvime
     Language.UHIM.Dictionary.Transform.Variants
     Language.UHIM.Dictionary.Source.Jion
