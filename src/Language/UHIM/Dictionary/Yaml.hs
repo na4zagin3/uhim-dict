@@ -136,6 +136,7 @@ deriveJSON jsonOptions{fieldLabelModifier = drop 4} ''WordDeclaration
 
 data JaVerbDeclaration = JaVerbDeclaration { jaVerb類 :: [JaVerbConjugation]
                                            , jaVerb聯 :: [WordConvPair]
+                                           , jaVerb義 :: Maybe [String]
                                            , jaVerb頻度 :: Maybe Double
                                            , jaVerb簽 :: Maybe [String]
                                            }
@@ -144,6 +145,7 @@ deriveJSON jsonOptions{fieldLabelModifier = drop 6} ''JaVerbDeclaration
 
 data JaAdjDeclaration = JaAdjDeclaration { jaAdj類 :: [JaAdjConjugation]
                                          , jaAdj聯 :: [WordConvPair]
+                                         , jaAdj義 :: Maybe [String]
                                          , jaAdj頻度 :: Maybe Double
                                          , jaAdj簽 :: Maybe [String]
                                          }
