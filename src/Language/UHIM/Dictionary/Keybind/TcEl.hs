@@ -73,7 +73,12 @@ data Config = Config {}
   deriving (Show, Read, Eq, Ord)
 
 emitKeytable :: (IsString s, Monoid s) => KeyMap -> s
-emitKeytable _ = "(setq tcode-tbl (make-vector 40 nil))qn"
+emitKeytable _ = mconcat [ "(setq tcode-tbl (make-vector 40 (make-string 40 ?□)))"
+                         , "\n"
+                         , "(setq tcode-non-2-stroke-char-list (list (tcode-string-to-char \"□\")))"
+                         , "\n"
+                         ]
+
 
 
 emit :: (IsString s, Monoid s) => KeyMap -> s
