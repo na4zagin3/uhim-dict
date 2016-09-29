@@ -7,6 +7,7 @@ import Data.Maybe
 import qualified Data.Map as M
 
 data Config = Config { name :: String
+                     , layoutName :: String
                      , extractConfig :: ExtractConfig
                      }
 
@@ -15,6 +16,7 @@ data ExtractConfig = ExtractConfig { kanjiExtractor :: KanjiShapes -> Maybe Kanj
 
 defaultConfig :: Config
 defaultConfig = Config { name = ""
+                       , layoutName = "TUT"
                        , extractConfig = ExtractConfig { kanjiExtractor = extractKyuKanji
                                                        }
                        }
@@ -35,5 +37,5 @@ extract c dict = [(name c ++ ".vim", Vim.emit keyMap)]
     keyMap = Vim.KeyMap { Vim.name = name c
                         , Vim.mappings = tuts
                         }
-    tuts = concatMap (extractConvEntry ec "TUT") dict
+    tuts = concatMap (extractConvEntry ec $ layoutName c) dict
     ec = extractConfig c
