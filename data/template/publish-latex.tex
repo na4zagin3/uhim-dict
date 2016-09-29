@@ -24,6 +24,9 @@
 
 \setlength{\columnseprule}{0.4pt}
 
+\newenvironment{Entry}{}{\par}
+\newcommand{\Position}[2]{\leavevmode\llap{\rensuji[r]{\tiny #2}}}
+
 \newcommand*{\HeadKanjiJaCommon}[1]{{\large 【#1】}}
 \newcommand*{\HeadKanjiJaTrad}[2][]{{\large 【#2】}}
 \newcommand*{\HeadKanjiJaSimp}[2][]{{\large 〖#2〗}}
@@ -32,8 +35,9 @@
 \newcommand*{\HeadWord}[2][]{#1【#2】}
 \newcommand*{\HeadWordVariant}[2][]{（#2）}
 
-\newenvironment{Entry}{}{\par}
-\newcommand{\Position}[2]{\leavevmode\llap{\rensuji[r]{\tiny #2}}}
+\newcommand*{\JaVerbConj}[1]{（#1）}
+\newcommand*{\JaAdvConj}[1]{（#1）}
+
 
 \NewDocumentCommand{\KanjiYomiElem}{m o m}{
   #1\ #3

@@ -4,6 +4,8 @@
 module Language.UHIM.Dictionary.Publish.LaTeX where
 
 import Language.UHIM.Japanese.Prim
+import Language.UHIM.Japanese.Verb as JV
+import Language.UHIM.Japanese.Adjective as JA
 import Language.UHIM.Dictionary.Yaml
 import Data.String
 import Data.List
@@ -73,8 +75,8 @@ meaning _ ss = mconcat [ "\\begin{MeaningPl}\n"
                        ]
 
 
-headWord :: (IsString s, Eq s) => [WordConvPair] -> [s]
-headWord wcp = concat [ ["\\HeadWord[語]{"]
+headWord :: (IsString s, Eq s) => String -> [WordConvPair] -> [s]
+headWord c wcp = concat [ ["\\HeadWord[", escape c, "]{"]
                       , trad
                       , ["}"]
                       , if trad /= simp
@@ -87,6 +89,22 @@ headWord wcp = concat [ ["\\HeadWord[語]{"]
     simp = map (headWordKanji extractShinKana extractShinKanji) wcp
     maps :: [(ShapeClass, String)]
     maps = sort . map (first readShapeKey) $ M.toList undefined
+
+verbConj :: (IsString s, Monoid s) => [JaVerbConjugation] -> s
+verbConj cs = mconcat [ "\\JaVerbConj{"
+                      , mconcat $ intersperse "・" symbs
+                      , "}"
+                      ]
+  where
+    symbs = map (fromString . JV.toSymbol) cs
+
+adjConj :: (IsString s, Monoid s) => [JaAdjConjugation] -> s
+adjConj cs = mconcat [ "\\JaAdvConj{"
+                      , mconcat $ intersperse "・" symbs
+                      , "}"
+                      ]
+  where
+    symbs = map (fromString . JA.toSymbol) cs
 
 emitPosition :: (IsString s, Monoid s, Eq s) => Position -> s
 emitPosition = mconcat . mconcat . map (\(f,p) -> [ "\\Position{", escape f, "}{", escape $ show p, "}"])
@@ -103,14 +121,33 @@ emitEntry c (pos, Entry字 decl) = mconcat [ emitPosition pos
 
 emitEntry c (pos, Entry語 decl) = mconcat [ emitPosition pos
                                           , "\n"
-                                          , mconcat $ headWord $ word聯 decl
+                                          , mconcat $ headWord "語" $ word聯 decl
                                           , "\n"
                                           , fromMaybe "" (meaning c <$> word義 decl)
                                           ]
+emitEntry c (pos, Entry日副詞 decl) = mconcat [ emitPosition pos
+                                             , "\n"
+                                             , mconcat $ headWord "日副詞" $ word聯 decl
+                                             , "\n"
+                                             , fromMaybe "" (meaning c <$> word義 decl)
+                                             ]
 
-emitEntry c (pos, Entry日動詞 decl) = ""
-emitEntry c (pos, Entry日形容詞 decl) = ""
-emitEntry c (pos, Entry日副詞 decl) = ""
+emitEntry c (pos, Entry日動詞 decl) = mconcat [ emitPosition pos
+                                             , "\n"
+                                             , mconcat $ headWord "日動詞" $ jaVerb聯 decl
+                                             , "\n"
+                                             , verbConj $ jaVerb類 decl
+                                             , "\n"
+                                             , fromMaybe "" (meaning c <$> jaVerb義 decl)
+                                             ]
+emitEntry c (pos, Entry日形容詞 decl) = mconcat [ emitPosition pos
+                                             , "\n"
+                                             , mconcat $ headWord "日形容詞" $ jaAdj聯 decl
+                                             , "\n"
+                                             , adjConj $ jaAdj類 decl
+                                             , "\n"
+                                             , fromMaybe "" (meaning c <$> jaAdj義 decl)
+                                             ]
 
 data Config = Config { template :: String
                      , multicols :: (String, String)
