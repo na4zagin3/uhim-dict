@@ -31,6 +31,7 @@ import System.FilePath
 import Paths_uhim_dict
 
 data SKKYomiTarget = Tcvime
+                   | TcEl
                    | Uim
   deriving (Show, Read, Eq, Ord)
 
@@ -123,6 +124,7 @@ execCommand (CommandSKKYomi opt) = do
   let ttyConfig = case skkYomiOutputTarget opt of
         (Just Uim) -> TTY.uimDefaultConfig
         (Just Tcvime) -> TTY.tcvimeDefaultConfig
+        (Just TcEl) -> TTY.uimDefaultConfig
         Nothing -> TTY.uimDefaultConfig
   let yomiDict = TTY.extractSKK ttyConfig yamlDict
   let variantDict = Var.extractSKK Var.defaultConfig yamlDict
