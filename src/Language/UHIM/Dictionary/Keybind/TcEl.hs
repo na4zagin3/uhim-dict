@@ -39,6 +39,7 @@ keyCodeMap = M.fromList $ zipWith (curry swap) [0..]
   , 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'
   , 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';'
   , 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/'
+  , ' '
   ]
 
 convertKeyCodeMap :: String -> Maybe [Int]
@@ -99,6 +100,8 @@ emit m = mconcat [ "(require 'tc)"
                    , "(setq tcode-stroke-file-name (concat tcode-data-directory "
                    , imSymbol
                    , " \".st\"))"
+                   , "\n"
+                   , "(setq tcode-key-num 41 tcode-ext-keys '(32))"
                    , "\n"
                    , emitKeytable m
                    , "\n"
