@@ -138,4 +138,5 @@ defaultMaps = [ ("alj", "tcode-mazegaki-begin-conversion")
               , ("39", "(lambda () (tcode-mazegaki-convert 3 t))")
               , ("49", "(lambda () (tcode-mazegaki-convert 4 t))")
               , ("59", "(lambda () (tcode-mazegaki-convert 5 t))")
+              , (" ", "\" \"")
               ]
