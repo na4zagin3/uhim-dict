@@ -37,6 +37,7 @@ data SKKYomiTarget = Tcvime
 
 data SKKYomiOptions = SKKYomiOptions { skkYomiOutputFile :: Maybe FilePath
                                      , skkYomiOutputTarget :: Maybe SKKYomiTarget
+                                     , skkYomiOutputKana :: Maybe String
                                      , skkYomiOutputComments :: Bool
                                      , skkYomiDictionaries :: [FilePath]
                                      }
@@ -52,6 +53,11 @@ skkYomiOption = SKKYomiOptions
                                         <> short 't'
                                         <> metavar "TARGET"
                                         <> help "Output target, one of Tcvime and Uim"
+                                        )
+                <*> optional (strOption $ long "kana"
+                                        <> short 'k'
+                                        <> metavar "KANA"
+                                        <> help "Output jion-kana type, one of ext (default), trad, and new."
                                         )
                 <*> flag False True ( long "comments"
                                    <> short 'c'
@@ -121,11 +127,18 @@ execCommand :: Command -> IO ()
 execCommand (CommandSKKYomi opt) = do
   yds <- readDictionary $ skkYomiDictionaries opt
   let yamlDict = either error id yds
-  let ttyConfig = case skkYomiOutputTarget opt of
+  let ttyConfigDefault = case skkYomiOutputTarget opt of
         (Just Uim) -> TTY.uimDefaultConfig
         (Just Tcvime) -> TTY.tcvimeDefaultConfig
         (Just TcEl) -> TTY.uimDefaultConfig
         Nothing -> TTY.uimDefaultConfig
+  let extractor = case skkYomiOutputKana opt of
+        (Just "ext") -> extractExtKyuKana
+        (Just "trad") -> extractKyuKana
+        (Just "new") -> extractShinKana
+        (Just k) -> error $ "unknown kana type: " ++ k
+        Nothing -> extractExtKyuKana
+  let ttyConfig = ttyConfigDefault { TTY.yomiExtractor = extractor }
   let yomiDict = TTY.extractSKK ttyConfig yamlDict
   let variantDict = Var.extractSKK Var.defaultConfig yamlDict
   let config =  SKK.defaultConfig { SKK.outputFrequency = skkYomiOutputComments opt }
