@@ -39,6 +39,7 @@ data Pron = Pron { pron日呉 :: Maybe JaYomi
                  , pron日慣用 :: Maybe JaYomi
                  , pron日送 :: Maybe JaYomi
                  , pron日迎 :: Maybe JaYomi
+                 , pron日音 :: Maybe JaYomi
                  }
     deriving (Eq, Ord, Show, Read)
 deriveJSON jsonOptions{fieldLabelModifier = drop 4} ''Pron
@@ -50,6 +51,7 @@ emptyPron = Pron { pron日漢 = Nothing
                  , pron日慣用 = Nothing
                  , pron日送 = Nothing
                  , pron日迎 = Nothing
+                 , pron日音 = Nothing
                  }
 
 data KanjiShapes = KanjiShapes (Map String String)
@@ -235,15 +237,17 @@ extractJaPronList p@Pron{pron日慣用 = Just x}  =  ("日慣用", x) : extractJ
 extractJaPronList p@Pron{pron日訓 = Just x}  =  ("日呉", x) : extractJaPronList (p {pron日訓 = Nothing})
 extractJaPronList p@Pron{pron日送 = Just x}  =  ("日送", x) : extractJaPronList (p {pron日送 = Nothing})
 extractJaPronList p@Pron{pron日迎 = Just x}  =  ("日迎", x) : extractJaPronList (p {pron日迎 = Nothing})
+extractJaPronList p@Pron{pron日音 = Just x}  =  ("日音", x) : extractJaPronList (p {pron日音 = Nothing})
 extractJaPronList _  =  []
 
 extractJaPron :: Pron -> JaYomi
-extractJaPron (Pron (Just x) Nothing  Nothing  Nothing  Nothing  Nothing)  = x
-extractJaPron (Pron Nothing  (Just x) Nothing  Nothing  Nothing  Nothing)  = x
-extractJaPron (Pron Nothing  Nothing  (Just x) Nothing  Nothing  Nothing)  = x
-extractJaPron (Pron Nothing  Nothing  Nothing  (Just x) Nothing  Nothing)  = x
-extractJaPron (Pron Nothing  Nothing  Nothing  Nothing  (Just x) Nothing)  = x
-extractJaPron (Pron Nothing  Nothing  Nothing  Nothing  Nothing  (Just x)) = x
+extractJaPron (Pron (Just x) Nothing  Nothing  Nothing  Nothing  Nothing Nothing)  = x
+extractJaPron (Pron Nothing  (Just x) Nothing  Nothing  Nothing  Nothing Nothing)  = x
+extractJaPron (Pron Nothing  Nothing  (Just x) Nothing  Nothing  Nothing Nothing)  = x
+extractJaPron (Pron Nothing  Nothing  Nothing  (Just x) Nothing  Nothing Nothing)  = x
+extractJaPron (Pron Nothing  Nothing  Nothing  Nothing  (Just x) Nothing Nothing)  = x
+extractJaPron (Pron Nothing  Nothing  Nothing  Nothing  Nothing  (Just x) Nothing) = x
+extractJaPron (Pron Nothing  Nothing  Nothing  Nothing  Nothing  Nothing (Just x)) = x
 extractJaPron x = error $ "extractJaPron: More than one pronunciation in " ++ show x
 
 extractJaProns :: Pron -> [JaYomi]
