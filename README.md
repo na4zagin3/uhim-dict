@@ -78,5 +78,7 @@ diff -u tc/tc-setup.el /Users/mrty/.emacs.d/elpa/tc-20150113.1926/tc-setup.el
 追記予定
 ```
 $ cd data
-$ stack build && stack exec uhim-dict -- latex -o latex-joyo.tex kana.yaml kana-ext.yaml symbol-ext.yaml joyo.yaml dict-ja.yaml dict-ja-pron.yaml && uplatex latex-joyo && dvipdfmx latex-joyo
+$ stack build && stack exec uhim-dict -- latex -o latex-joyo.tex kana.yaml kana-ext.yaml symbol-ext.yaml joyo.yaml dict-ja.yaml dict-ja-prop.yaml
+# uplatex latex-joyo && dvipdfmx latex-joyo
+$ lualatex latex-joyo && dvipdfmx latex-joyo
 ```
