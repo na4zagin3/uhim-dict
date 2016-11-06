@@ -109,6 +109,7 @@ emit m = mconcat [ "(require 'tc)"
                    , defaultKeys
                    , keys
                    , "))\n"
+                   , setq "tcode-mode-help-string" . fromString $ defaultMessage imIndicator
                    ]
   where
     imSymbol :: (IsString s, Monoid s) => s
@@ -128,6 +129,7 @@ setq symb str = mconcat [ "(setq "
 
 defaultMaps :: [(String, String)]
 defaultMaps = [ ("alj", "tcode-mazegaki-begin-conversion")
+              , ("ala", "tcode-bushu-begin-conversion")
               , ("09", "tcode-mazegaki-begin-alternate-conversion")
               , ("18", "(lambda () (tcode-mazegaki-convert 1 current-prefix-arg))")
               , ("28", "(lambda () (tcode-mazegaki-convert 2 current-prefix-arg))")
@@ -139,4 +141,29 @@ defaultMaps = [ ("alj", "tcode-mazegaki-begin-conversion")
               , ("49", "(lambda () (tcode-mazegaki-convert 4 t))")
               , ("59", "(lambda () (tcode-mazegaki-convert 5 t))")
               , (" ", "\" \"")
+              , ("44", "(lambda () (tcode-display-stroke-sequence tcode-last-help-char-list))")
+              , ("55", "(lambda () (tcode-query-stroke (point)))")
+              , ("77", "tcode-bushu-begin-alternate-conversion")
+              , ("88", "(lambda () (tcode-transpose-strokes nil))")
+              , ("99", "tcode-clear")
               ]
+
+defaultMessage :: String -> String
+defaultMessage mode = unlines $
+  [ mode ++ "コードモード中のキー操作は次のとおり。"
+  , "   ala : 部首合成変換モードに入る。alaを打ち続けると再帰的に部首合成変換を行うことができる。"
+  , "   alj : 交ぜ書き変換を行う(see variable `tcode-use-prefix-mazegaki')。"
+  , "   44 : 直前に表示した打ち方を再表示する。"
+  , "   55 : ポイント位置にある文字の打ち方を表示する。"
+  , "   58 : 活用語を優先して交ぜ書き変換を行う。"
+  , "   77 : ポイント前にある2文字で部首合成変換を行う。"
+  , "   88 : ポイント位置にある文字を逆ストローク化する(例: 年->の)。"
+  , "        行末ではポイントの直前の文字を変換する。"
+  , "   99 : 交ぜ書き変換モードや部首変換モードにいた時に、"
+  , "        それらを全部キャンセルする。また、ヘルプを消す。"
+  , "   [1-4]8, [2-5]9: 文字数を指定して交ぜ書き変換を行う。"
+  , "   \\[toggle-input-method] : " ++ mode ++ "コードモードを抜ける。"
+  , ""
+  , "初めて起動された時には，`tcode-ready-hook' を実行する。"
+  , "また、起動される度に`tcode-toggle-hook'を実行する。"
+  ]
