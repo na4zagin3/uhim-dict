@@ -7,19 +7,19 @@
 
 #### uim-tutcode用
 ```
-$ stack build && stack exec uhim-dict -- skk-yomi -t Uim kana.yaml kana-ext.yaml joyo.yaml non-joyo.yaml > ~/tcode/mazegaki-trad.dic
+$ stack build && stack exec uhim-dict -- skk-yomi -t Uim kana.yaml kana-ext.yaml symbol-ext.yaml joyo.yaml non-joyo.yaml > ~/tcode/mazegaki-trad.dic
 ```
 
 #### tcvime用
 ```
-$ stack build && stack exec uhim-dict -- skk-yomi -t Tcvime kana.yaml kana-ext.yaml joyo.yaml non-joyo.yaml > ~/tcode/mazegaki-trad.dic
+$ stack build && stack exec uhim-dict -- skk-yomi -t Tcvime kana.yaml kana-ext.yaml symbol-ext.yaml joyo.yaml non-joyo.yaml > ~/tcode/mazegaki-trad.dic
 ```
 
 #### tc.el用
 現状、uim-tutcodeと同じ。
 
 ```
-$ stack build && stack exec uhim-dict -- skk-yomi -t TcEl kana.yaml kana-ext.yaml joyo.yaml non-joyo.yaml > ~/tcode/mazegaki-trad.dic
+$ stack build && stack exec uhim-dict -- skk-yomi -t TcEl kana.yaml kana-ext.yaml symbol-ext.yaml joyo.yaml non-joyo.yaml > ~/tcode/mazegaki-trad.dic
 ```
 
 ### キー配列の生成
@@ -29,7 +29,7 @@ $ stack build && stack exec uhim-dict -- skk-yomi -t TcEl kana.yaml kana-ext.yam
 追記予定
 ```
 $ cd data
-$ stack build && stack exec uhim-dict -- tcvime --name tutcodeo kana.yaml kana-ext.yaml joyo.yaml non-joyo.yaml
+$ stack build && stack exec uhim-dict -- tcvime --name tutcodeo kana.yaml kana-ext.yaml symbol-ext.yaml joyo.yaml non-joyo.yaml
 $ mv tutcodeo.vim ~/.vim/keymap
 ```
 
@@ -37,7 +37,7 @@ $ mv tutcodeo.vim ~/.vim/keymap
 以下の様に tc 本体への変更が要る。
 ```
 $ cd data
-$ stack build && stack exec uhim-dict -- tcel --name tutcodeo kana.yaml kana-ext.yaml joyo.yaml non-joyo.yaml
+$ stack build && stack exec uhim-dict -- tcel --name tutcodeo kana.yaml kana-ext.yaml symbol-ext.yaml joyo.yaml non-joyo.yaml
 $ mv tutcodeo-tbl.el ~/.emacs.d/elpa/tc-<version>/
 ```
 例：
@@ -78,5 +78,5 @@ diff -u tc/tc-setup.el /Users/mrty/.emacs.d/elpa/tc-20150113.1926/tc-setup.el
 追記予定
 ```
 $ cd data
-$ stack build && stack exec uhim-dict -- latex -o latex-joyo.tex kana.yaml joyo.yaml && uplatex latex-joyo && dvipdfmx latex-joyo
+$ stack build && stack exec uhim-dict -- latex -o latex-joyo.tex kana.yaml kana-ext.yaml symbol-ext.yaml joyo.yaml dict-ja.yaml dict-ja-pron.yaml && uplatex latex-joyo && dvipdfmx latex-joyo
 ```
