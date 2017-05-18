@@ -1,17 +1,21 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE Rank2Types #-}
+{-# LANGUAGE FlexibleContexts #-}
 module Language.UHIM.Dictionary.Publish.LaTeX where
 
 import Language.UHIM.Japanese.Prim
 import Language.UHIM.Japanese.Verb as JV
 import Language.UHIM.Japanese.Adjective as JA
 import Language.UHIM.Dictionary.Yaml
+import Data.Either
 import Data.String
 import Data.List
 import Data.Maybe
 import Data.Map (Map)
 import qualified Data.Map as M
+import Text.Parsec
+import qualified Text.Parsec as P
 
 import Control.Arrow
 
@@ -176,17 +180,21 @@ emitDict c ds  = [ fromString $ template c
                          ,  "\\end{Entry}\n"
                          ]
 
-escapeChar :: IsString s => Char -> s
-escapeChar '\\' = "\\textbackslash "
-escapeChar '$' = "\\$"
-escapeChar '%' = "\\%"
-escapeChar '#' = "\\#"
-escapeChar '{' = "\\{"
-escapeChar '}' = "\\}"
-escapeChar '&' = "\\&"
-escapeChar '_' = "\\_"
-escapeChar '^' = "\\^"
-escapeChar c = fromString [c]
+escapeChar :: (Stream s m Char) => ParsecT s u m String
+escapeChar = (oneOf "$%#{}&^" >>= \c -> return ("\\" ++ [c])) <|> (char '\\' >> return "\\textbackslash ")
+
+escapeHandakuten :: (Stream s m Char) => ParsecT s u m String
+escapeHandakuten = try $ do
+  c <- noneOf "ハヒフヘホ"
+  _ <- string "\x309a"
+  return $ "{\\bou{" ++ [c] ++ "}}"
+
+escapeString :: (Stream s m Char) => ParsecT s u m String
+escapeString = fmap concat . many $ choice [ escapeHandakuten
+                                           , escapeChar
+                                           , anyChar >>= \c -> return [c]
+                                           ]
 
 escape :: (IsString s) => String -> s
-escape = fromString . concatMap escapeChar
+escape s = fromString . either (error . show) id $ P.parse escapeString "LaTeX:escape" s
+
