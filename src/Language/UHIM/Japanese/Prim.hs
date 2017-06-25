@@ -29,3 +29,6 @@ instance FromJSON JaYomi where
                            v .: "舊"
     parseJSON (String v) = pure $ NonChange . T.unpack $ v
     parseJSON v          = typeMismatch "JaYomi" v
+
+data JaLanguageVariant = ModernStandardJapanese | MiddleJapanese
+    deriving (Eq, Ord, Show, Read)

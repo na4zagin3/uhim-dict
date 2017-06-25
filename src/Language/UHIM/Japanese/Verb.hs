@@ -9,7 +9,7 @@ import Data.Aeson.Types hiding (parse)
 
 import Language.UHIM.Japanese.Prim
 
-data JaVerbConjugation = JaVerbConjugation JaVerbStem JaVerbClass
+data JaVerbConjugation = JaVerbConjugation JaLanguageVariant JaVerbStem JaVerbClass
     deriving (Eq, Ord, Show, Read)
 
 data JaVerbStem = StemZero
@@ -24,11 +24,15 @@ data JaVerbStem = StemZero
                 | StemW
     deriving (Eq, Ord, Show, Read)
 
-data JaVerbClass = Quinquegrade | Quadrigrade | SuperMonograde | SuperBigrade | SubMonograde | SubBigrade | IrregularModern | IrregularClassic
+data JaVerbClass = Quinquegrade | Quadrigrade | SuperMonograde | SuperBigrade | SubMonograde | SubBigrade | Irregular
     deriving (Eq, Ord, Show, Read)
 
 jaVerbClasses :: Map String JaVerbConjugation
-jaVerbClasses = M.fromList . map (\(x, s, c) -> (x, JaVerbConjugation s c)) $ ls
+jaVerbClasses = M.fromList $ do
+    (x, s, c) <- ls
+    [ (x, JaVerbConjugation ModernStandardJapanese s c)
+      , ("文" `mappend` x, JaVerbConjugation MiddleJapanese s c)
+      ]
   where
     ls = [ ("ア四",   StemZero, Quadrigrade)
          , ("ア五",   StemZero, Quinquegrade)
@@ -43,10 +47,8 @@ jaVerbClasses = M.fromList . map (\(x, s, c) -> (x, JaVerbConjugation s c)) $ ls
          , ("カ上一", StemK, SuperMonograde)
          , ("カ下二", StemK, SubBigrade)
          , ("カ下一", StemK, SubMonograde)
-         , ("カ變",   StemK, IrregularModern)
-         , ("カ変",   StemK, IrregularModern)
-         , ("文カ變", StemK, IrregularClassic)
-         , ("文カ変", StemK, IrregularClassic)
+         , ("カ變",   StemK, Irregular)
+         , ("カ変",   StemK, Irregular)
 
          , ("ガ四",   StemG, Quadrigrade)
          , ("ガ五",   StemG, Quinquegrade)
@@ -61,10 +63,8 @@ jaVerbClasses = M.fromList . map (\(x, s, c) -> (x, JaVerbConjugation s c)) $ ls
          , ("サ上一", StemS, SuperMonograde)
          , ("サ下二", StemS, SubBigrade)
          , ("サ下一", StemS, SubMonograde)
-         , ("サ變",   StemS, IrregularModern)
-         , ("サ変",   StemS, IrregularModern)
-         , ("文サ變", StemS, IrregularClassic)
-         , ("文サ変", StemS, IrregularClassic)
+         , ("サ變",   StemS, Irregular)
+         , ("サ変",   StemS, Irregular)
 
          , ("ザ四",   StemZ, Quadrigrade)
          , ("ザ五",   StemZ, Quinquegrade)
@@ -72,10 +72,8 @@ jaVerbClasses = M.fromList . map (\(x, s, c) -> (x, JaVerbConjugation s c)) $ ls
          , ("ザ上一", StemZ, SuperMonograde)
          , ("ザ下二", StemZ, SubBigrade)
          , ("ザ下一", StemZ, SubMonograde)
-         , ("ザ變",   StemZ, IrregularModern)
-         , ("ザ変",   StemZ, IrregularModern)
-         , ("文ザ變", StemZ, IrregularClassic)
-         , ("文ザ変", StemZ, IrregularClassic)
+         , ("ザ變",   StemZ, Irregular)
+         , ("ザ変",   StemZ, Irregular)
 
          , ("タ四",   StemT, Quadrigrade)
          , ("タ五",   StemT, Quinquegrade)
@@ -97,10 +95,8 @@ jaVerbClasses = M.fromList . map (\(x, s, c) -> (x, JaVerbConjugation s c)) $ ls
          , ("ナ上一", StemN, SuperMonograde)
          , ("ナ下二", StemN, SubBigrade)
          , ("ナ下一", StemN, SubMonograde)
-         , ("ナ變",   StemN, IrregularModern)
-         , ("ナ変",   StemN, IrregularModern)
-         , ("文ナ變", StemN, IrregularClassic)
-         , ("文ナ変", StemN, IrregularClassic)
+         , ("ナ變",   StemN, Irregular)
+         , ("ナ変",   StemN, Irregular)
 
          , ("ハ四",   StemF, Quadrigrade)
          , ("ハ五",   StemF, Quinquegrade)
@@ -143,10 +139,8 @@ jaVerbClasses = M.fromList . map (\(x, s, c) -> (x, JaVerbConjugation s c)) $ ls
          , ("ラ上一", StemR, SuperMonograde)
          , ("ラ下二", StemR, SubBigrade)
          , ("ラ下一", StemR, SubMonograde)
-         , ("ラ變",   StemR, IrregularModern)
-         , ("ラ変",   StemR, IrregularModern)
-         , ("文ラ變", StemR, IrregularClassic)
-         , ("文ラ変", StemR, IrregularClassic)
+         , ("ラ變",   StemR, Irregular)
+         , ("ラ変",   StemR, Irregular)
 
          , ("ワ四",   StemW, Quadrigrade)
          , ("ワ五",   StemW, Quinquegrade)
@@ -176,21 +170,24 @@ stemRepresentive StemY = "ヤ"
 stemRepresentive StemR = "ラ"
 stemRepresentive StemW = "ワ"
 
+classRepresentive :: JaVerbClass -> String
+classRepresentive Quadrigrade = "四"
+classRepresentive Quinquegrade = "五"
+classRepresentive SuperBigrade = "上二"
+classRepresentive SuperMonograde = "上一"
+classRepresentive SubBigrade = "下二"
+classRepresentive SubMonograde = "下一"
+classRepresentive Irregular = "變"
+
 toSymbol :: JaVerbConjugation -> String
-toSymbol (JaVerbConjugation s Quadrigrade) = stemRepresentive s ++ "四"
-toSymbol (JaVerbConjugation s Quinquegrade) = stemRepresentive s ++ "五"
-toSymbol (JaVerbConjugation s SuperBigrade) = stemRepresentive s ++ "上二"
-toSymbol (JaVerbConjugation s SuperMonograde) = stemRepresentive s ++ "上一"
-toSymbol (JaVerbConjugation s SubBigrade) = stemRepresentive s ++ "下二"
-toSymbol (JaVerbConjugation s SubMonograde) = stemRepresentive s ++ "下一"
-toSymbol (JaVerbConjugation s IrregularModern) = stemRepresentive s ++ "變"
-toSymbol (JaVerbConjugation s IrregularClassic) = "文" ++ stemRepresentive s ++ "變"
+toSymbol (JaVerbConjugation ModernStandardJapanese s c) = mconcat [stemRepresentive s, classRepresentive c]
+toSymbol (JaVerbConjugation MiddleJapanese s c) = mconcat ["文", stemRepresentive s, classRepresentive c]
 
 instance ToJSON JaVerbConjugation where
     toJSON jvc = toJSON $ toSymbol jvc
 
 instance FromJSON JaVerbConjugation where
-    parseJSON (String v) | T.head v == '文' && not (T.last v `elem` ['変', '變']) = maybe (fail . T.unpack $ "Unknown Japanese verb class:" `mappend` v) pure . parse . T.unpack $ T.tail v
+    -- parseJSON (String v) | T.head v == '文' && not (T.last v `elem` ['変', '變']) = maybe (fail . T.unpack $ "Unknown Japanese verb class:" `mappend` v) pure . parse . T.unpack $ T.tail v
     parseJSON (String v) = maybe (fail . T.unpack $ "Unknown Japanese verb class:" `mappend` v) pure . parse $ T.unpack v
     parseJSON v          = typeMismatch "JaYomi" v
 
@@ -272,24 +269,24 @@ conjEnding StemW "e" = Changed "え" "ゑ"
 conjEnding StemW "o" = Changed "お" "を"
 conjEnding s v = error $ "conjEnding: Unknown Stem (" ++ show s ++ ") and vowel (" ++ v ++ ")"
 
-conjSuffixes :: JaVerbStem -> JaVerbClass -> [String]
-conjSuffixes _ Quadrigrade = ["a", "i", "u", "e"]
-conjSuffixes _ Quinquegrade = ["a", "i", "u", "e", "o"]
-conjSuffixes _ SuperBigrade = ["i", "u"]
-conjSuffixes _ SuperMonograde = ["i"]
-conjSuffixes _ SubBigrade = ["e", "u"]
-conjSuffixes _ SubMonograde = ["e"]
-conjSuffixes StemK IrregularModern = ["o", "i", "u"]
-conjSuffixes StemK IrregularClassic = ["e", "i", "u"]
-conjSuffixes StemN IrregularModern = ["a", "i", "u", "e"]
-conjSuffixes StemN IrregularClassic = ["a", "i", "u", "e"]
-conjSuffixes StemS IrregularModern = ["i", "u", "e"]
-conjSuffixes StemS IrregularClassic = ["i", "u", "e"]
-conjSuffixes StemZ IrregularModern = ["i", "u", "e"]
-conjSuffixes StemZ IrregularClassic = ["i", "u", "e"]
-conjSuffixes StemR IrregularModern = ["a", "i", "u", "e"]
-conjSuffixes StemR IrregularClassic = ["a", "i", "u", "e"]
-conjSuffixes s c = error $ "conjSuffixes: Unknown Verb Class " ++ show (s, c)
+conjSuffixes :: JaLanguageVariant -> JaVerbStem -> JaVerbClass -> [String]
+conjSuffixes _ _ Quadrigrade = ["a", "i", "u", "e"]
+conjSuffixes _ _ Quinquegrade = ["a", "i", "u", "e", "o"]
+conjSuffixes _ _ SuperBigrade = ["i", "u"]
+conjSuffixes _ _ SuperMonograde = ["i"]
+conjSuffixes _ _ SubBigrade = ["e", "u"]
+conjSuffixes _ _ SubMonograde = ["e"]
+conjSuffixes ModernStandardJapanese StemK Irregular = ["o", "i", "u"]
+conjSuffixes MiddleJapanese StemK Irregular = ["e", "i", "u"]
+conjSuffixes ModernStandardJapanese StemN Irregular = ["a", "i", "u", "e"]
+conjSuffixes MiddleJapanese StemN Irregular = ["a", "i", "u", "e"]
+conjSuffixes ModernStandardJapanese StemS Irregular = ["i", "u", "e"]
+conjSuffixes MiddleJapanese StemS Irregular = ["i", "u", "e"]
+conjSuffixes ModernStandardJapanese StemZ Irregular = ["i", "u", "e"]
+conjSuffixes MiddleJapanese StemZ Irregular = ["i", "u", "e"]
+conjSuffixes ModernStandardJapanese StemR Irregular = ["a", "i", "u", "e"]
+conjSuffixes MiddleJapanese StemR Irregular = ["a", "i", "u", "e"]
+conjSuffixes v s c = error $ "conjSuffixes: Unknown Verb Class " ++ show (v, s, c)
 
 conjEndings :: JaVerbConjugation -> [JaYomi]
-conjEndings (JaVerbConjugation s c) = map (conjEnding s) $ conjSuffixes s c
+conjEndings (JaVerbConjugation v s c) = map (conjEnding s) $ conjSuffixes v s c

@@ -149,27 +149,23 @@ adjConvSuffixes JaAdjNari = ([NonChange ""], False)
 adjConvSuffixes JaAdjTari = ([NonChange ""], False)
 
 verbConvSuffixes :: JaVerbConjugation -> [JaYomi]
-verbConvSuffixes (JaVerbConjugation _ Quadrigrade) = [NonChange ""]
-verbConvSuffixes (JaVerbConjugation _ Quinquegrade) = [NonChange ""]
-verbConvSuffixes (JaVerbConjugation StemS IrregularClassic) = []
-verbConvSuffixes (JaVerbConjugation StemS IrregularModern) = []
-verbConvSuffixes (JaVerbConjugation StemZ IrregularClassic) = []
-verbConvSuffixes (JaVerbConjugation StemZ IrregularModern) = []
+verbConvSuffixes (JaVerbConjugation _ _ Quadrigrade) = [NonChange ""]
+verbConvSuffixes (JaVerbConjugation _ _ Quinquegrade) = [NonChange ""]
+verbConvSuffixes (JaVerbConjugation _ StemS Irregular) = []
+verbConvSuffixes (JaVerbConjugation _ StemZ Irregular) = []
 verbConvSuffixes jvc = conjEndings jvc
 
 verbConvFinalSuffixes :: JaVerbConjugation -> [JaYomi]
-verbConvFinalSuffixes (JaVerbConjugation _ Quadrigrade) = []
-verbConvFinalSuffixes (JaVerbConjugation _ Quinquegrade) = []
-verbConvFinalSuffixes (JaVerbConjugation StemS IrregularClassic) = [NonChange ""]
-verbConvFinalSuffixes (JaVerbConjugation StemS IrregularModern) = [NonChange ""]
-verbConvFinalSuffixes (JaVerbConjugation StemZ IrregularClassic) = [NonChange ""]
-verbConvFinalSuffixes (JaVerbConjugation StemZ IrregularModern) = [NonChange ""]
-verbConvFinalSuffixes (JaVerbConjugation StemK IrregularClassic) = [NonChange "き", NonChange "く"]
-verbConvFinalSuffixes (JaVerbConjugation StemK IrregularModern) = [NonChange "き"]
-verbConvFinalSuffixes (JaVerbConjugation StemN IrregularClassic) = [NonChange "に", NonChange "ぬ"]
-verbConvFinalSuffixes (JaVerbConjugation StemN IrregularModern) = [NonChange "に", NonChange "ぬ"]
-verbConvFinalSuffixes (JaVerbConjugation StemR IrregularModern) = [NonChange "り"]
-verbConvFinalSuffixes (JaVerbConjugation StemR IrregularClassic) = [NonChange "り"]
+verbConvFinalSuffixes (JaVerbConjugation _ _ Quadrigrade) = []
+verbConvFinalSuffixes (JaVerbConjugation _ _ Quinquegrade) = []
+verbConvFinalSuffixes (JaVerbConjugation _ StemS Irregular) = [NonChange ""]
+verbConvFinalSuffixes (JaVerbConjugation _ StemZ Irregular) = [NonChange ""]
+verbConvFinalSuffixes (JaVerbConjugation MiddleJapanese StemK Irregular) = [NonChange "き", NonChange "く"]
+verbConvFinalSuffixes (JaVerbConjugation ModernStandardJapanese StemK Irregular) = [NonChange "き"]
+verbConvFinalSuffixes (JaVerbConjugation MiddleJapanese StemN Irregular) = [NonChange "に", NonChange "ぬ"]
+verbConvFinalSuffixes (JaVerbConjugation ModernStandardJapanese StemN Irregular) = [NonChange "に", NonChange "ぬ"]
+verbConvFinalSuffixes (JaVerbConjugation ModernStandardJapanese StemR Irregular) = [NonChange "り"]
+verbConvFinalSuffixes (JaVerbConjugation MiddleJapanese StemR Irregular) = [NonChange "り"]
 verbConvFinalSuffixes jvc = conjEndings jvc
 
 isRequiredOkurigana :: ExtractConfig -> JaVerbDeclaration -> Bool
