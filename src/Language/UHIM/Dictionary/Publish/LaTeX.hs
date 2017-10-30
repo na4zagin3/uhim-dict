@@ -34,12 +34,14 @@ emitHeadKanjiShapes (KanjiShapes ks) = fromString . unwords $ map (uncurry emitH
     maps = sort . map (first readShapeKey) $ M.toList ks
 
 headWordKanji :: (IsString s) => (JaYomi -> Maybe Kana) -> (KanjiShapes -> Maybe Kanji) -> WordConvPair -> s
-headWordKanji extYomi extKanji kp = fromString . f kanji . extYomi . extractJaPron $ word讀 kp
+headWordKanji extYomi extKanji kp = fromString . f kanji . extractYomi . extractJaProns $ word讀 kp
   where
     kanji = fromMaybe "" $ extKanji $ word字 kp
     f k Nothing = k
     f "$$" (Just y) = y
     f k (Just y) = "\\ruby{" ++ escape k ++ "}{" ++ escape y ++ "}"
+    extractYomi [x] = extYomi x
+    extractYomi xs = error $ "headWordKanji: Currently, only one pronunciation is allowed; but got: " ++ show kp ++ ", " ++ show xs
 
 kanjiYomiElem :: (IsString s, Monoid s) => (String, JaYomi) -> s
 kanjiYomiElem (key, NonChange y) = mconcat [ "\\KanjiYomiElem{"
@@ -197,4 +199,3 @@ escapeString = fmap concat . many $ choice [ escapeHandakuten
 
 escape :: (IsString s) => String -> s
 escape s = fromString . either (error . show) id $ P.parse escapeString "LaTeX:escape" s
-

@@ -111,10 +111,13 @@ extractConvEntry c (pos, ent@(Entry日形容詞 decl)) = do
   return $ VerbConversion kys (okuri, okuri ++ if conj then iMark else "") $ fromMaybe 1 $ frequency ent
 
 extractWordConvPair :: ExtractConfig -> WordConvPair -> Maybe (Kanji, Kana)
-extractWordConvPair c (WordConvPair ks p) = do
+extractWordConvPair c kp@(WordConvPair ks p) = do
   k <- kanjiExtractor c ks
-  y <- yomiExtractor c $ extractJaPron p
+  y <- yomiExtractor' $ extractJaProns p
   return (if k == kanaMark then y else k, y)
+  where
+    yomiExtractor' [x] = yomiExtractor c x
+    yomiExtractor' _ = error $ "extractWordConvPair: Currently, only one pronunciation is allowed; but got: " ++ show kp
 
 extractVerbWordConvPair :: ExtractConfig -> String -> WordConvPair -> Maybe (Kanji, Kana)
 extractVerbWordConvPair c suf cp = do
@@ -172,8 +175,10 @@ isRequiredOkurigana :: ExtractConfig -> JaVerbDeclaration -> Bool
 isRequiredOkurigana c decl = f $ jaVerb聯 decl
   where
     f [] = error $ "isRequiredOkurigana: No yomi definitions: " ++ show decl
-    f [cp] = (yomiExtractor c . extractJaPron $ word讀 cp) /= Just nonOkuriganaMark
+    f [cp] = (yomiExtractor' . extractJaProns $ word讀 cp) /= Just nonOkuriganaMark
     f (_:xs) = f xs
+    yomiExtractor' [x] = yomiExtractor c x
+    yomiExtractor' _ = error $ "isRequiredOkurigana: Currently, only one pronunciation is allowed; but got: " ++ show decl
 
 nonOkuriganaMark :: String
 nonOkuriganaMark = "$"

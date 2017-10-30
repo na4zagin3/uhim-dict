@@ -240,15 +240,15 @@ extractJaPronList p@Pron{pron日迎 = Just x}  =  ("日迎", x) : extractJaPronL
 extractJaPronList p@Pron{pron日音 = Just x}  =  ("日音", x) : extractJaPronList (p {pron日音 = Nothing})
 extractJaPronList _  =  []
 
-extractJaPron :: Pron -> JaYomi
-extractJaPron (Pron (Just x) Nothing  Nothing  Nothing  Nothing  Nothing Nothing)  = x
-extractJaPron (Pron Nothing  (Just x) Nothing  Nothing  Nothing  Nothing Nothing)  = x
-extractJaPron (Pron Nothing  Nothing  (Just x) Nothing  Nothing  Nothing Nothing)  = x
-extractJaPron (Pron Nothing  Nothing  Nothing  (Just x) Nothing  Nothing Nothing)  = x
-extractJaPron (Pron Nothing  Nothing  Nothing  Nothing  (Just x) Nothing Nothing)  = x
-extractJaPron (Pron Nothing  Nothing  Nothing  Nothing  Nothing  (Just x) Nothing) = x
-extractJaPron (Pron Nothing  Nothing  Nothing  Nothing  Nothing  Nothing (Just x)) = x
-extractJaPron x = error $ "extractJaPron: More than one pronunciation in " ++ show x
+extractJaPron :: Pron -> Maybe JaYomi
+extractJaPron (Pron (Just x) Nothing  Nothing  Nothing  Nothing  Nothing Nothing)  = Just x
+extractJaPron (Pron Nothing  (Just x) Nothing  Nothing  Nothing  Nothing Nothing)  = Just x
+extractJaPron (Pron Nothing  Nothing  (Just x) Nothing  Nothing  Nothing Nothing)  = Just x
+extractJaPron (Pron Nothing  Nothing  Nothing  (Just x) Nothing  Nothing Nothing)  = Just x
+extractJaPron (Pron Nothing  Nothing  Nothing  Nothing  (Just x) Nothing Nothing)  = Just x
+extractJaPron (Pron Nothing  Nothing  Nothing  Nothing  Nothing  (Just x) Nothing) = Just x
+extractJaPron (Pron Nothing  Nothing  Nothing  Nothing  Nothing  Nothing (Just x)) = Just x
+extractJaPron _ = Nothing
 
 extractJaProns :: Pron -> [JaYomi]
-extractJaProns pron = mapMaybe (\f -> f pron) [pron日呉, pron日漢, pron日訓]
+extractJaProns = map snd . extractJaPronList
