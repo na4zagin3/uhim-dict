@@ -117,10 +117,24 @@ tcElOption = TcElOptions
                              <> help "Layout name")
                 <*> many (argument str (metavar "FILE..."))
 
+data CheckOptions = CheckOptions { checkDictionaries :: [FilePath]
+                                 , checkOutputFile :: Maybe FilePath
+                                 }
+  deriving (Show, Read, Eq, Ord)
+checkOption :: Parser CheckOptions
+checkOption = CheckOptions
+                <$> many (argument str (metavar "FILE..."))
+                <*> optional (strOption $ long "output"
+                                        <> short 'o'
+                                        <> metavar "FILE"
+                                        <> help "Output file"
+                                        )
+
 data Command = CommandSKKYomi SKKYomiOptions
              | CommandLaTeX LaTeXOptions
              | CommandTcvime TcvimeOptions
              | CommandTcEl TcElOptions
+             | CommandCheck CheckOptions
   deriving (Show, Read, Eq, Ord)
 
 execCommand :: Command -> IO ()
@@ -172,6 +186,13 @@ execCommand (CommandTcEl opt) = do
   let dir = fromMaybe "." $ tcElOutputDirectory opt
   let fss = map (first (dir </>)) $ TE.extract conf yamlDict
   forM_ fss (uncurry writeFile)
+execCommand (CommandCheck opt) = do
+  yds <- readDictionary $ checkDictionaries opt
+  let yamlDict = either error id yds
+  -- TODO Add checks
+  case checkOutputFile opt of
+    Nothing -> return ()
+    Just f -> Y.encodeFile f $ map snd yamlDict
 
 readDictionary :: [FilePath] -> IO (Either String Dictionary)
 readDictionary [] = do
@@ -189,7 +210,9 @@ opts = subparser
   (  command "skk-yomi" (info (helper <*> (CommandSKKYomi <$> skkYomiOption)) (progDesc "Generate SKK yomi dictionary"))
   <> command "latex" (info (helper <*> (CommandLaTeX <$> latexOption)) (progDesc "Generate LaTeX file"))
   <> command "tcvime" (info (helper <*> (CommandTcvime <$> tcvimeOption)) (progDesc "Generate Tcvime files"))
-  <> command "tcel" (info (helper <*> (CommandTcEl <$> tcElOption)) (progDesc "Generate Tc.el files")))
+  <> command "tcel" (info (helper <*> (CommandTcEl <$> tcElOption)) (progDesc "Generate Tc.el files"))
+  <> command "check" (info (helper <*> (CommandCheck <$> checkOption)) (progDesc "Check dictionary files"))
+  )
 
 main :: IO ()
 main = execParser progOpts >>= execCommand
