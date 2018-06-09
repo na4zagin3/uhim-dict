@@ -6,3 +6,5 @@ TAGS
 /dist
 /work
 auto/
+*.hp
+*.prof
