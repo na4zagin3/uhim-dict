@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e248cec84945449c4f6c625fc2fd5f1ecc7fa5b30b0c08d0bf2b0608f92e81e0
+-- hash: d09464c66081435bde4e813bfb6e9b6f102b3ec3282a442aac64d36e7f5fb23e
 
 name:           uhim-dict
 version:        0.1.0.0
@@ -39,6 +39,7 @@ library
     , containers >=0.5 && <0.6
     , filepath >=1.4 && <1.5
     , lens >=4.13 && <4.17
+    , mtl
     , optparse-applicative >=0.12 && <0.15
     , parsec >=3.1 && <3.2
     , text >=1.2 && <1.3
@@ -50,6 +51,7 @@ library
 executable uhim-dict
   main-is: Main.hs
   other-modules:
+      Commandline
       Language.UHIM.Dictionary.Keybind.TcEl
       Language.UHIM.Dictionary.Keybind.Vim
       Language.UHIM.Dictionary.Publish.LaTeX
@@ -77,6 +79,7 @@ executable uhim-dict
     , containers >=0.5 && <0.6
     , filepath >=1.4 && <1.5
     , lens >=4.13 && <4.17
+    , mtl
     , optparse-applicative >=0.12 && <0.15
     , parsec >=3.1 && <3.2
     , text >=1.2 && <1.3
