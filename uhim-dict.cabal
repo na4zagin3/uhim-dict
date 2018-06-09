@@ -1,54 +1,86 @@
-name:                uhim-dict
-version:             0.1.0.0
--- synopsis:            
--- description:         
-license:             GPL-3
-license-file:        LICENSE
-author:              na4zagin3
-maintainer:          mrty.ityt.pt@gmail.com
--- copyright:           
-category:            Language
-build-type:          Simple
--- extra-source-files:  
-cabal-version:       >=1.10
-data-dir:
-  data
+-- This file has been generated from package.yaml by hpack version 0.28.2.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: e248cec84945449c4f6c625fc2fd5f1ecc7fa5b30b0c08d0bf2b0608f92e81e0
+
+name:           uhim-dict
+version:        0.1.0.0
+synopsis:       Unified 漢直 Input Method Dictionary
+description:    This is to generate 漢直 Dictionaries from unified formatted dictionary.
+category:       Language
+homepage:       https://github.com/na4zagin3/uhim-dict#readme
+bug-reports:    https://github.com/na4zagin3/uhim-dict/issues
+author:         na4zagin3
+maintainer:     mrty.ityt.pt@gmail.com
+license:        GPL-3
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
+extra-source-files:
+    README.md
 data-files:
-  template/*.tex
+    template/publish-latex.tex
+data-dir:       data
+
+source-repository head
+  type: git
+  location: https://github.com/na4zagin3/uhim-dict
+
+library
+  other-modules:
+      Paths_uhim_dict
+  build-depends:
+      aeson >=0.11 && <1.3
+    , aeson-diff >=1.1 && <1.3
+    , base >=4.8 && <4.11
+    , bytestring >=0.10 && <0.12
+    , cassava >=0.4 && <0.6
+    , containers >=0.5 && <0.6
+    , filepath >=1.4 && <1.5
+    , lens >=4.13 && <4.17
+    , optparse-applicative >=0.12 && <0.15
+    , parsec >=3.1 && <3.2
+    , text >=1.2 && <1.3
+    , utf8-string >=1.0 && <1.1
+    , vector >=0.11 && <0.13
+    , yaml >=0.8 && <0.9
+  default-language: Haskell2010
 
 executable uhim-dict
-  main-is:             Main.hs
-  other-modules:       
-    Language.UHIM.Japanese.Prim
-    Language.UHIM.Japanese.Adjective
-    Language.UHIM.Japanese.Verb
-    Language.UHIM.Dictionary.SKK.SKKExtended
-    Language.UHIM.Dictionary.Yaml
-    Language.UHIM.Dictionary.Yaml.Prim
-    Language.UHIM.Dictionary.Keybind.Vim
-    Language.UHIM.Dictionary.Keybind.TcEl
-    Language.UHIM.Dictionary.Transform.TUTYomi
-    Language.UHIM.Dictionary.Transform.TcEl
-    Language.UHIM.Dictionary.Transform.Tcvime
-    Language.UHIM.Dictionary.Transform.Variants
-    Language.UHIM.Dictionary.Source.Jion
-    Language.UHIM.Dictionary.Publish.LaTeX
-  -- other-extensions:    
-  build-depends:       base >=4.8 && <4.11
-                     , containers >=0.5 && <0.6
-                     -- , mtl >=2.2 && <2.3
-                     , parsec >=3.1 && <3.2
-                     , lens >=4.13 && <4.17
-                     , yaml >=0.8 && <0.9
-                     , text >=1.2 && <1.3
-                     , vector >=0.11 && <0.13
-                     , aeson >=0.11 && <1.3
-                     , aeson-diff >=1.1 && <1.3
-                     , bytestring >=0.10 && <0.12
-                     , utf8-string >=1.0 && <1.1
-                     , cassava >=0.4 && <0.6
-                     , optparse-applicative >= 0.12 && < 0.15
-                     , filepath >= 1.4 && < 1.5
-
-  hs-source-dirs:      src
-  default-language:    Haskell2010
+  main-is: Main.hs
+  other-modules:
+      Language.UHIM.Dictionary.Keybind.TcEl
+      Language.UHIM.Dictionary.Keybind.Vim
+      Language.UHIM.Dictionary.Publish.LaTeX
+      Language.UHIM.Dictionary.SKK.SKKExtended
+      Language.UHIM.Dictionary.Source.Jion
+      Language.UHIM.Dictionary.Transform.TcEl
+      Language.UHIM.Dictionary.Transform.Tcvime
+      Language.UHIM.Dictionary.Transform.TUTYomi
+      Language.UHIM.Dictionary.Transform.Variants
+      Language.UHIM.Dictionary.Yaml
+      Language.UHIM.Dictionary.Yaml.Prim
+      Language.UHIM.Japanese.Adjective
+      Language.UHIM.Japanese.Prim
+      Language.UHIM.Japanese.Verb
+      Paths_uhim_dict
+  hs-source-dirs:
+      src
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson >=0.11 && <1.3
+    , aeson-diff >=1.1 && <1.3
+    , base >=4.8 && <4.11
+    , bytestring >=0.10 && <0.12
+    , cassava >=0.4 && <0.6
+    , containers >=0.5 && <0.6
+    , filepath >=1.4 && <1.5
+    , lens >=4.13 && <4.17
+    , optparse-applicative >=0.12 && <0.15
+    , parsec >=3.1 && <3.2
+    , text >=1.2 && <1.3
+    , utf8-string >=1.0 && <1.1
+    , vector >=0.11 && <0.13
+    , yaml >=0.8 && <0.9
+  default-language: Haskell2010

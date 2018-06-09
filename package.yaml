@@ -1,0 +1,50 @@
+name:                uhim-dict
+version:             0.1.0.0
+github:              "na4zagin3/uhim-dict"
+license:             GPL-3
+license-file:        LICENSE
+author:              "na4zagin3"
+maintainer:          "mrty.ityt.pt@gmail.com"
+# copyright:           
+
+extra-source-files:  
+- README.md
+
+synopsis:            Unified 漢直 Input Method Dictionary
+category:            Language
+description:         This is to generate 漢直 Dictionaries from unified formatted dictionary.
+
+dependencies:
+- base >=4.8 && <4.11
+- containers >=0.5 && <0.6
+- parsec >=3.1 && <3.2
+- lens >=4.13 && <4.17
+- yaml >=0.8 && <0.9
+- text >=1.2 && <1.3
+- vector >=0.11 && <0.13
+- aeson >=0.11 && <1.3
+- aeson-diff >=1.1 && <1.3
+- bytestring >=0.10 && <0.12
+- utf8-string >=1.0 && <1.1
+- cassava >=0.4 && <0.6
+- optparse-applicative >= 0.12 && < 0.15
+- filepath >= 1.4 && < 1.5
+
+data-dir: data
+data-files:
+- template/*.tex
+
+library: {}
+
+executables:
+  uhim-dict:
+    main: Main.hs
+    source-dirs: src
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    # dependencies:
+    # - uhim-dict
+
+tests: {}
