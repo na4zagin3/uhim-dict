@@ -25,7 +25,14 @@
 \setlength{\columnseprule}{0.4pt}
 
 \newenvironment{Entry}{}{\par}
-\newcommand{\Position}[2]{\leavevmode\llap{\rensuji[r]{\tiny #2}}}
+\newcommand{\UhimPositionFile}[1]{UHIM@Position/File/#1}
+\newcounter{UhimPositionCounter}
+\newcommand{\Position}[2]{\leavevmode\llap{\rensuji[r]{\tiny \csname \UhimPositionFile{#1}\endcsname:#2}}}
+\newcommand{\UhimPosition}[1]{%
+  \stepcounter{UhimPositionCounter}%
+  \expandafter\edef\csname \UhimPositionFile{#1}\endcsname{\arabic{UhimPositionCounter}}%
+  \arabic{UhimPositionCounter}: \texttt{#1}\par
+}
 
 \newcommand*{\HeadKanjiJaCommon}[1]{{\large 【#1】}}
 \newcommand*{\HeadKanjiJaTrad}[2][]{{\large 【#2】}}

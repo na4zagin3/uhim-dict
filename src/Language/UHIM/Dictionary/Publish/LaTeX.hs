@@ -14,6 +14,7 @@ import Data.List
 import Data.Maybe
 import Data.Map (Map)
 import qualified Data.Map as M
+import qualified Data.Set as S
 import Text.Parsec
 import qualified Text.Parsec as P
 
@@ -155,6 +156,14 @@ emitEntry c (pos, Entry日形容詞 decl) = mconcat [ emitPosition pos
                                              , fromMaybe "" (meaning c <$> jaAdj義 decl)
                                              ]
 
+emitFilePaths :: (IsString s, Monoid s, Eq s) => [FilePath] -> s
+emitFilePaths fps = mconcat $ intersperse "\n" $ map f fps
+  where
+    f fp = mconcat [ "\\UhimPosition{"
+                   , fromString fp
+                   , "}"
+                   ]
+
 data Config = Config { template :: String
                      , multicols :: (String, String)
                      , yomiSeparator :: String
@@ -171,6 +180,7 @@ emitDict c ds  = [ fromString $ template c
                  , "\n"
                  , "\\begin{document}\n"
                  , fromString . fst $ multicols c
+                 , emitFilePaths . S.toList . S.fromList . map fst $ concatMap fst ds
                  , mconcat $ map (entryEnv . emitEntry c) ds
                  , "\n"
                  , fromString . snd $ multicols c
