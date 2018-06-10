@@ -60,15 +60,22 @@ kanjiYomiElem (key, Changed n t) = mconcat [ "\\KanjiYomiElem{"
                                            , "}"
                                            ]
 
-kanjiYomi :: (IsString s, Monoid s) => Config -> [Pron] -> s
+kanjiYomi :: (IsString s, Monoid s, Eq s) => Config -> [Pron] -> s
 kanjiYomi _ [] = ""
-kanjiYomi c ps = mconcat [ "\\begin{Yomi}\n"
-                         , mconcat . mconcat $ map f ps
-                         , "\\end{Yomi}"
-                         ]
+kanjiYomi c ps = if content == mempty
+  then mempty
+  else mconcat [ "\\begin{Yomi}\n"
+               , content
+               , "\\end{Yomi}"
+               ]
   where
-    f :: (IsString s, Monoid s) => Pron -> [s]
-    f = (\x -> ["\\YomiUnit{", x, "}\n"]) . mconcat . intersperse (fromString $ yomiSeparator c) . map kanjiYomiElem . extractJaPronList
+    f :: (IsString s, Monoid s) => Pron -> s
+    f = mconcat . intersperse (fromString $ yomiSeparator c) . map kanjiYomiElem . extractJaPronList
+    g :: (IsString s, Monoid s, Eq s) => Pron -> s
+    g pron = case f pron of
+      x | x == mempty -> mempty
+      x | otherwise   -> mconcat ["\\YomiUnit{", x, "}\n"]
+    content = mconcat $ map g ps
 
 meaning :: (IsString s, Monoid s) => Config -> [String] -> s
 meaning _ [] = ""
