@@ -52,20 +52,9 @@
     {（#2）}
 }
 
-\ifluatex%
-  \newcommand{\YomiUnit}[1]{#1\par}
-  \newenvironment{Yomi}{}{\hspace*{1\fill} ・\hspace*{1\fill}\par}
-\else%
-  \newcommand*{\YomiUnit}{\item}
-  \newenvironment{Yomi}{\begin{itemize}}{\end{itemize}}
-\fi
+\newcommand*{\YomiUnit}{\item}
+\newenvironment{Yomi}{\begin{itemize}}{\end{itemize}}
 
-\ifluatex%
-  \newcommand{\Meaning}[1]{#1\par}
-  \newenvironment{MeaningSg}{}{}
-  \newenvironment{MeaningPl}{}{}
-\else%
-  \newcommand*{\Meaning}{\item}
-  \newenvironment{MeaningSg}{}{}
-  \newenvironment{MeaningPl}{\begin{itemize}}{\end{itemize}}
-\fi
+\newcommand*{\Meaning}{\item}
+\newenvironment{MeaningSg}{}{}
+\newenvironment{MeaningPl}{\begin{itemize}}{\end{itemize}}
