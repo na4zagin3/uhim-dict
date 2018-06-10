@@ -10,14 +10,16 @@ import Language.UHIM.Dictionary.Transform.Tcvime as TV
 import Language.UHIM.Dictionary.Transform.TcEl as TE
 import Language.UHIM.Dictionary.Publish.LaTeX as LaTeX
 import Language.UHIM.Dictionary.Yaml
+import qualified Language.UHIM.Dictionary.Yaml.Comparator as Comp
 
 import qualified Data.ByteString as BS
 -- import qualified Data.ByteString.Lazy as BL
 import qualified Data.Yaml as Y
+import Data.Function (on)
 -- import qualified Data.Text as T
 -- import qualified Data.Map as M
 -- import Data.Map (Map)
--- import qualified Data.List as L
+import qualified Data.List as L
 import Data.Either
 import Data.Maybe
 import Data.Monoid
@@ -166,7 +168,7 @@ execCommand (CommandLaTeX opt) = do
                  Nothing -> getDataFileName "template/publish-latex.tex"
                  Just x -> return x
   templ <- readFile templFile
-  let yamlDict = either error id yds
+  let yamlDict = L.sortBy (Comp.compareJaClassical Comp.defaultConfig `on` snd) $ either error id yds
   let conf = LaTeX.defaultConfig { LaTeX.template = templ }
   let outputStr = unlines $ LaTeX.emitDict conf yamlDict
   case latexOutputFile opt of

@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e248cec84945449c4f6c625fc2fd5f1ecc7fa5b30b0c08d0bf2b0608f92e81e0
+-- hash: 58e65d103335d06ec2ba85d878538cab7761412d06001545027009bc1bd4db5b
 
 name:           uhim-dict
 version:        0.1.0.0
@@ -60,6 +60,7 @@ executable uhim-dict
       Language.UHIM.Dictionary.Transform.TUTYomi
       Language.UHIM.Dictionary.Transform.Variants
       Language.UHIM.Dictionary.Yaml
+      Language.UHIM.Dictionary.Yaml.Comparator
       Language.UHIM.Dictionary.Yaml.Prim
       Language.UHIM.Japanese.Adjective
       Language.UHIM.Japanese.Prim
