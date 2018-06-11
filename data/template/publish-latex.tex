@@ -55,6 +55,15 @@
 \newcommand*{\YomiUnit}{\item}
 \newenvironment{Yomi}{\begin{itemize}}{\end{itemize}}
 
+\newcommand*{\Frequency}[1]{頻度：#1}
+
+\def\KeySeparator{}
+\newcommand*{\Key}[2]{\KeySeparator\def\KeySeparator{,} #1: \texttt{#2}}
+\newenvironment{Keys}{打鍵\def\KeySeparator{}}{}
+
+\newcommand*{\Shape}[2]{\item[#1]#2}
+\newenvironment{Shapes}{形\begin{itemize}}{\end{itemize}}
+
 \newcommand*{\Meaning}{\item}
 \newenvironment{MeaningSg}{}{}
 \newenvironment{MeaningPl}{\begin{itemize}}{\end{itemize}}
