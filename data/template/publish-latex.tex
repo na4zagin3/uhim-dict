@@ -21,6 +21,9 @@
 % \documentclass[a4paper,landscape]{ltjsarticle}
 \usepackage{multicol}
 \usepackage{xparse}
+\usepackage{enumitem}
+
+\setlist{nolistsep}
 
 \setlength{\columnseprule}{0.4pt}
 
@@ -45,12 +48,14 @@
 \newcommand*{\JaVerbConj}[1]{（#1）}
 \newcommand*{\JaAdvConj}[1]{（#1）}
 
-
+\def\KanjiYomiSeparator{}
 \NewDocumentCommand{\KanjiYomiElem}{m o m}{
-  #1\ #3
+  \KanjiYomiSeparator\def\KanjiYomiSeparator{\\}#1\ #3
   \IfValueT{#2}
     {（#2）}
 }
+
+\newcommand{\FieldHeader}[1]{{\renewcommand{\fboxsep}{1pt}\fbox{#1}}}
 
 \newcommand*{\YomiUnit}{\item}
 \newenvironment{Yomi}{\begin{itemize}}{\end{itemize}}
@@ -59,14 +64,15 @@
 
 \def\KeySeparator{}
 \newcommand*{\Key}[2]{\KeySeparator\def\KeySeparator{,} #1: \texttt{#2}}
-\newenvironment{Keys}{打鍵\def\KeySeparator{}}{}
+\newenvironment{Keys}{\FieldHeader{打鍵}\def\KeySeparator{}}{}
 
 \newcommand*{\Shape}[2]{\item[#1]#2}
-\newenvironment{Shapes}{形\begin{itemize}}{\end{itemize}}
+\newenvironment{Shapes}{\FieldHeader{形}\begin{itemize}}{\end{itemize}}
 
 \newcommand*{\Meaning}{\item}
 \newenvironment{MeaningSg}{}{}
 \newenvironment{MeaningPl}{\begin{itemize}}{\end{itemize}}
 
-\newcommand*{\Tag}{\item}
-\newenvironment{Tags}{\begin{itemize}}{\end{itemize}}
+\def\TagSeparator{}
+\newcommand*{\Tag}{\KeySeparator\def\KeySeparator{・}}
+\newenvironment{Tags}{\FieldHeader{籤}}{}

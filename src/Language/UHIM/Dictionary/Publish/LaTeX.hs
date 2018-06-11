@@ -70,7 +70,7 @@ kanjiYomi c ps = if content == mempty
                ]
   where
     f :: (IsString s, Monoid s) => Pron -> s
-    f = mconcat . intersperse (fromString $ yomiSeparator c) . map kanjiYomiElem . extractJaPronList
+    f = mconcat . map kanjiYomiElem . extractJaPronList
     g :: (IsString s, Monoid s, Eq s) => Pron -> s
     g pron = case f pron of
       x | x == mempty -> mempty
@@ -170,53 +170,53 @@ emitEntry c (pos, d@(Entry字 decl)) = mconcat
 
 emitEntry c (pos, d@(Entry語 decl)) = mconcat
   [ emitPosition pos
-  , "\n"
+  , "%\n"
   , mconcat $ headWord "語" $ word聯 decl
-  , "\n"
+  , "%\n"
   , emitFrequency c $ frequency d
-  , "\n"
+  , "%\n"
   , fromMaybe "" (meaning c <$> word義 decl)
-  , "\n"
+  , "%\n"
   , fromMaybe "" (tags c <$> entryLabel d)
   ]
 
 emitEntry c (pos, d@(Entry日副詞 decl)) = mconcat
   [ emitPosition pos
-  , "\n"
+  , "%\n"
   , mconcat $ headWord "日副詞" $ word聯 decl
-  , "\n"
+  , "%\n"
   , emitFrequency c $ frequency d
-  , "\n"
+  , "%\n"
   , fromMaybe "" (meaning c <$> word義 decl)
-  , "\n"
+  , "%\n"
   , fromMaybe "" (tags c <$> entryLabel d)
   ]
 
 emitEntry c (pos, d@(Entry日動詞 decl)) = mconcat
   [ emitPosition pos
-  , "\n"
+  , "%\n"
   , mconcat $ headWord "日動詞" $ jaVerb聯 decl
-  , "\n"
+  , "%\n"
   , verbConj $ jaVerb類 decl
-  , "\n"
+  , "%\n"
   , emitFrequency c $ frequency d
-  , "\n"
+  , "%\n"
   , fromMaybe "" (meaning c <$> jaVerb義 decl)
-  , "\n"
+  , "%\n"
   , fromMaybe "" (tags c <$> entryLabel d)
   ]
 
 emitEntry c (pos, d@(Entry日形容詞 decl)) = mconcat
   [ emitPosition pos
-  , "\n"
+  , "%\n"
   , mconcat $ headWord "日形容詞" $ jaAdj聯 decl
-  , "\n"
+  , "%\n"
   , adjConj $ jaAdj類 decl
-  , "\n"
+  , "%\n"
   , emitFrequency c $ frequency d
-  , "\n"
+  , "%\n"
   , fromMaybe "" (meaning c <$> jaAdj義 decl)
-  , "\n"
+  , "%\n"
   , fromMaybe "" (tags c <$> entryLabel d)
   ]
 
@@ -230,13 +230,11 @@ emitFilePaths fps = mconcat $ intersperse "\n" $ map f fps
 
 data Config = Config { template :: String
                      , multicols :: (String, String)
-                     , yomiSeparator :: String
                      }
 
 defaultConfig :: Config
 defaultConfig = Config { template = ""
                        , multicols = ("\\begin{multicols*}{5}\n", "\\end{multicols*}\n")
-                       , yomiSeparator = "\\\\"
                        }
 
 emitDict :: (IsString s, Monoid s, Eq s) => Config -> Dictionary -> [s]
