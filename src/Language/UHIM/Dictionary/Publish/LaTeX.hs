@@ -88,6 +88,13 @@ meaning _ ss = mconcat [ "\\begin{MeaningPl}\n"
                        , "\\end{MeaningPl}\n"
                        ]
 
+tags :: (IsString s, Monoid s) => Config -> [String] -> s
+tags _ [] = ""
+tags _ ss = mconcat [ "\\begin{Tags}\n"
+                    , mconcat $ map (\s -> mconcat ["\\Tag{", escape s, "}\n"]) ss
+                    , "\\end{Tags}\n"
+                    ]
+
 
 headWord :: (IsString s, Eq s) => String -> [WordConvPair] -> [s]
 headWord c wcp = concat [ ["\\HeadWord[", escape c, "]{"]
@@ -131,6 +138,8 @@ emitEntry c (pos, Entry字 decl) = mconcat [ emitPosition pos
                                           , kanjiYomi c $ kanji音 decl
                                           , "\n"
                                           , fromMaybe "" (meaning c <$> kanji義 decl)
+                                          , "\n"
+                                          , fromMaybe "" (tags c <$> kanji簽 decl)
                                           ]
 
 emitEntry c (pos, Entry語 decl) = mconcat [ emitPosition pos
@@ -138,12 +147,16 @@ emitEntry c (pos, Entry語 decl) = mconcat [ emitPosition pos
                                           , mconcat $ headWord "語" $ word聯 decl
                                           , "\n"
                                           , fromMaybe "" (meaning c <$> word義 decl)
+                                          , "\n"
+                                          , fromMaybe "" (tags c <$> word簽 decl)
                                           ]
 emitEntry c (pos, Entry日副詞 decl) = mconcat [ emitPosition pos
                                              , "\n"
                                              , mconcat $ headWord "日副詞" $ word聯 decl
                                              , "\n"
                                              , fromMaybe "" (meaning c <$> word義 decl)
+                                             , "\n"
+                                             , fromMaybe "" (tags c <$> word簽 decl)
                                              ]
 
 emitEntry c (pos, Entry日動詞 decl) = mconcat [ emitPosition pos
@@ -153,6 +166,8 @@ emitEntry c (pos, Entry日動詞 decl) = mconcat [ emitPosition pos
                                              , verbConj $ jaVerb類 decl
                                              , "\n"
                                              , fromMaybe "" (meaning c <$> jaVerb義 decl)
+                                             , "\n"
+                                             , fromMaybe "" (tags c <$> jaVerb簽 decl)
                                              ]
 emitEntry c (pos, Entry日形容詞 decl) = mconcat [ emitPosition pos
                                              , "\n"
@@ -161,6 +176,8 @@ emitEntry c (pos, Entry日形容詞 decl) = mconcat [ emitPosition pos
                                              , adjConj $ jaAdj類 decl
                                              , "\n"
                                              , fromMaybe "" (meaning c <$> jaAdj義 decl)
+                                             , "\n"
+                                             , fromMaybe "" (tags c <$> jaAdj簽 decl)
                                              ]
 
 emitFilePaths :: (IsString s, Monoid s, Eq s) => [FilePath] -> s
