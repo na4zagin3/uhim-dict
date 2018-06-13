@@ -4,11 +4,8 @@ import Data.Function (on)
 import Data.Maybe
 
 import Language.UHIM.Japanese.Prim
-import Language.UHIM.Japanese.Adjective
 import qualified Language.UHIM.Japanese.Collator as Col
-import Language.UHIM.Japanese.Verb
 
-import Language.UHIM.Dictionary.Yaml
 import Language.UHIM.Dictionary.Yaml
 
 data Config = Config { yomiExtractor :: JaYomi -> Maybe Kana
@@ -28,7 +25,7 @@ defaultConfig = Config { yomiExtractor = extractExtKyuKana
                        }
 
 extractYomi :: Config -> DictEntry -> String
-extractYomi c (Entry字 kd) = ""
+extractYomi _ (Entry字 _) = ""
 extractYomi c (Entry語 wd) = extractYomiFromWordConvPairs c $ word聯 wd
 extractYomi c (Entry日動詞 wd) = extractYomiFromWordConvPairs c $ jaVerb聯 wd
 extractYomi c (Entry日形容詞 wd) = extractYomiFromWordConvPairs c $ jaAdj聯 wd
@@ -36,9 +33,9 @@ extractYomi c (Entry日副詞 wd) = extractYomiFromWordConvPairs c $ word聯 wd
 
 -- ToDo Support inflexion endings. (gh-63)
 extractYomiFromWordConvPairs :: Config -> [WordConvPair] -> String
-extractYomiFromWordConvPairs c wcs = mconcat . catMaybes $ map extractYomi wcs
+extractYomiFromWordConvPairs c wcs = mconcat . catMaybes $ map extractYomiFromWordConvPair wcs
   where
-    extractYomi wc = (extractJaPron $ word讀 wc) >>= yomiExtractor c >>= extractYomiFromWord wc
+    extractYomiFromWordConvPair wc = (extractJaPron $ word讀 wc) >>= yomiExtractor c >>= extractYomiFromWord wc
     extractYomiFromWord wc "$" = kanjiExtractor c $ word字 wc
     extractYomiFromWord _ x = Just x
 
