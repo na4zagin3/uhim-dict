@@ -58,8 +58,11 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - uhim-dict
+    - hedgehog
     - tasty
     - tasty-discover
-    - tasty-hunit
+    - tasty-hedgehog
     - tasty-hspec
+    - tasty-hunit
     - tasty-quickcheck
+    - text-icu
