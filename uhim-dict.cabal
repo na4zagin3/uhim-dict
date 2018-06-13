@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 58e65d103335d06ec2ba85d878538cab7761412d06001545027009bc1bd4db5b
+-- hash: c1609a6e2164dcd584e676c2263b34c709a361a060f79c8984893c0d27e7fb3d
 
 name:           uhim-dict
 version:        0.1.0.0
@@ -28,8 +28,26 @@ source-repository head
   location: https://github.com/na4zagin3/uhim-dict
 
 library
+  exposed-modules:
+      Language.UHIM.Dictionary.Keybind.TcEl
+      Language.UHIM.Dictionary.Keybind.Vim
+      Language.UHIM.Dictionary.Publish.LaTeX
+      Language.UHIM.Dictionary.SKK.SKKExtended
+      Language.UHIM.Dictionary.Source.Jion
+      Language.UHIM.Dictionary.Transform.TcEl
+      Language.UHIM.Dictionary.Transform.Tcvime
+      Language.UHIM.Dictionary.Transform.TUTYomi
+      Language.UHIM.Dictionary.Transform.Variants
+      Language.UHIM.Dictionary.Yaml
+      Language.UHIM.Dictionary.Yaml.Comparator
+      Language.UHIM.Dictionary.Yaml.Prim
+      Language.UHIM.Japanese.Adjective
+      Language.UHIM.Japanese.Prim
+      Language.UHIM.Japanese.Verb
   other-modules:
       Paths_uhim_dict
+  hs-source-dirs:
+      src
   build-depends:
       aeson >=0.11 && <1.3
     , aeson-diff >=1.1 && <1.3
@@ -50,24 +68,9 @@ library
 executable uhim-dict
   main-is: Main.hs
   other-modules:
-      Language.UHIM.Dictionary.Keybind.TcEl
-      Language.UHIM.Dictionary.Keybind.Vim
-      Language.UHIM.Dictionary.Publish.LaTeX
-      Language.UHIM.Dictionary.SKK.SKKExtended
-      Language.UHIM.Dictionary.Source.Jion
-      Language.UHIM.Dictionary.Transform.TcEl
-      Language.UHIM.Dictionary.Transform.Tcvime
-      Language.UHIM.Dictionary.Transform.TUTYomi
-      Language.UHIM.Dictionary.Transform.Variants
-      Language.UHIM.Dictionary.Yaml
-      Language.UHIM.Dictionary.Yaml.Comparator
-      Language.UHIM.Dictionary.Yaml.Prim
-      Language.UHIM.Japanese.Adjective
-      Language.UHIM.Japanese.Prim
-      Language.UHIM.Japanese.Verb
       Paths_uhim_dict
   hs-source-dirs:
-      src
+      app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson >=0.11 && <1.3
@@ -81,6 +84,38 @@ executable uhim-dict
     , optparse-applicative >=0.12 && <0.15
     , parsec >=3.1 && <3.2
     , text >=1.2 && <1.3
+    , uhim-dict
+    , utf8-string >=1.0 && <1.1
+    , vector >=0.11 && <0.13
+    , yaml >=0.8 && <0.9
+  default-language: Haskell2010
+
+test-suite uhim-dict-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_uhim_dict
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson >=0.11 && <1.3
+    , aeson-diff >=1.1 && <1.3
+    , base >=4.8 && <4.11
+    , bytestring >=0.10 && <0.12
+    , cassava >=0.4 && <0.6
+    , containers >=0.5 && <0.6
+    , filepath >=1.4 && <1.5
+    , lens >=4.13 && <4.17
+    , optparse-applicative >=0.12 && <0.15
+    , parsec >=3.1 && <3.2
+    , tasty
+    , tasty-discover
+    , tasty-hspec
+    , tasty-hunit
+    , tasty-quickcheck
+    , text >=1.2 && <1.3
+    , uhim-dict
     , utf8-string >=1.0 && <1.1
     , vector >=0.11 && <0.13
     , yaml >=0.8 && <0.9
