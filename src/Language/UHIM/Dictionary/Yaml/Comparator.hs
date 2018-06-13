@@ -5,6 +5,7 @@ import Data.Maybe
 
 import Language.UHIM.Japanese.Prim
 import Language.UHIM.Japanese.Adjective
+import qualified Language.UHIM.Japanese.Collator as Col
 import Language.UHIM.Japanese.Verb
 
 import Language.UHIM.Dictionary.Yaml
@@ -13,6 +14,7 @@ import Language.UHIM.Dictionary.Yaml
 data Config = Config { yomiExtractor :: JaYomi -> Maybe Kana
                      , kanjiExtractor :: KanjiShapes -> Maybe Kanji
                      , kanjiStandardVariant :: [String]
+                     , kanaCollator :: Col.Collator
                      }
 
 defaultConfig :: Config
@@ -22,6 +24,7 @@ defaultConfig = Config { yomiExtractor = extractExtKyuKana
                                                 , jaKanjiKey
                                                 , commonKanjiKey
                                                 ]
+                       , kanaCollator = Col.japaneseCollator False
                        }
 
 extractYomi :: Config -> DictEntry -> String
@@ -31,6 +34,7 @@ extractYomi c (Entry日動詞 wd) = extractYomiFromWordConvPairs c $ jaVerb聯 w
 extractYomi c (Entry日形容詞 wd) = extractYomiFromWordConvPairs c $ jaAdj聯 wd
 extractYomi c (Entry日副詞 wd) = extractYomiFromWordConvPairs c $ word聯 wd
 
+-- ToDo Support inflexion endings. (gh-63)
 extractYomiFromWordConvPairs :: Config -> [WordConvPair] -> String
 extractYomiFromWordConvPairs c wcs = mconcat . catMaybes $ map extractYomi wcs
   where
@@ -44,6 +48,5 @@ compareJaClassical c a b = mconcat [ compareYomi
                                    , lastResort
                                    ]
   where
-    -- ToDo: language specific comparison. e.g, か < カク < かた
-    compareYomi = (compare `on` extractYomi c) a b
+    compareYomi = (Col.collate (kanaCollator c) `on` extractYomi c) a b
     lastResort = compare a b
