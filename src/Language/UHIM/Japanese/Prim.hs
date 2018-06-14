@@ -1,10 +1,13 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Language.UHIM.Japanese.Prim where
 
-import qualified Data.Text as T
-import Data.Monoid
 import Data.Aeson.Types
+import Data.Monoid (mempty)
+import Data.Semigroup as Sem
+import qualified Data.Text as T
+
 import GHC.Generics
 
 type ShinKana = String
@@ -16,6 +19,19 @@ type Kanji = String
 data JaYomi = NonChange String
             | Changed ShinKana KyuKana -- 新仮名遣 旧仮名遣
     deriving (Show, Read, Eq, Ord, Generic)
+
+instance Sem.Semigroup JaYomi where
+  NonChange a <> NonChange b = NonChange (a <> b)
+  NonChange a <> Changed b1 b2 = Changed (a <> b1) (a <> b2)
+  Changed a1 a2 <> NonChange b = Changed (a1 <> b) (a2 <> b)
+  Changed a1 a2 <> Changed b1 b2 = Changed (a1 <> b1) (a2 <> b2)
+
+instance Monoid JaYomi where
+  mempty = NonChange ""
+
+#if !(MIN_VERSION_base(4,11,0))
+  mappend = (<>)
+#endif
 
 instance ToJSON JaYomi where
     toJSON (NonChange str) = String $ T.pack str

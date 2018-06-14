@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
--- import Language.UHIM.Dictionary.SKK.SKKExtended (SKKDict)
+import Language.UHIM.Japanese.Transform as JaT
 import qualified Language.UHIM.Dictionary.SKK.SKKExtended as SKK
 import Language.UHIM.Dictionary.Transform.TUTYomi as TTY
 import Language.UHIM.Dictionary.Transform.Variants as Var
@@ -169,8 +169,9 @@ execCommand (CommandLaTeX opt) = do
                  Just x -> return x
   templ <- readFile templFile
   let yamlDict = L.sortBy (Comp.compareJaClassical Comp.defaultConfig `on` snd) $ either error id yds
+  let yamlDict' = map (id *** JaT.appendEnding JaT.defaultConfig) yamlDict
   let conf = LaTeX.defaultConfig { LaTeX.template = templ }
-  let outputStr = unlines $ LaTeX.emitDict conf yamlDict
+  let outputStr = unlines $ LaTeX.emitDict conf yamlDict'
   case latexOutputFile opt of
     Nothing -> putStrLn outputStr
     Just fp -> writeFile fp outputStr

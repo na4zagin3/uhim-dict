@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Language.UHIM.Japanese.Verb where
 
+import Data.Semigroup
 import qualified Data.Text as T
 import qualified Data.Map as M
 import Data.Map (Map)
@@ -287,6 +288,25 @@ conjSuffixes MiddleJapanese StemZ Irregular = ["i", "u", "e"]
 conjSuffixes ModernStandardJapanese StemR Irregular = ["a", "i", "u", "e"]
 conjSuffixes MiddleJapanese StemR Irregular = ["a", "i", "u", "e"]
 conjSuffixes v s c = error $ "conjSuffixes: Unknown Verb Class " ++ show (v, s, c)
+
+conjDictForm :: JaVerbConjugation -> JaYomi
+conjDictForm (JaVerbConjugation _ s Quadrigrade) = conjEnding s "u"
+conjDictForm (JaVerbConjugation _ s Quinquegrade) = conjEnding s "u"
+conjDictForm (JaVerbConjugation _ s SuperBigrade) = conjEnding s "u"
+conjDictForm (JaVerbConjugation _ s SuperMonograde) = conjEnding s "i" <> NonChange "る"
+conjDictForm (JaVerbConjugation _ s SubBigrade) = conjEnding s "u"
+conjDictForm (JaVerbConjugation _ s SubMonograde) = conjEnding s "e" <> NonChange "る"
+conjDictForm (JaVerbConjugation ModernStandardJapanese s@StemK Irregular) = conjEnding s "u" <> NonChange "る"
+conjDictForm (JaVerbConjugation MiddleJapanese s@StemK Irregular) = conjEnding s "u"
+conjDictForm (JaVerbConjugation ModernStandardJapanese s@StemN Irregular) = conjEnding s "u"
+conjDictForm (JaVerbConjugation MiddleJapanese s@StemN Irregular) = conjEnding s "u"
+conjDictForm (JaVerbConjugation ModernStandardJapanese s@StemS Irregular) = conjEnding s "u" <> NonChange "る"
+conjDictForm (JaVerbConjugation MiddleJapanese s@StemS Irregular) = conjEnding s "u"
+conjDictForm (JaVerbConjugation ModernStandardJapanese s@StemZ Irregular) = conjEnding s "u"
+conjDictForm (JaVerbConjugation MiddleJapanese s@StemZ Irregular) = conjEnding s "u"
+conjDictForm (JaVerbConjugation ModernStandardJapanese s@StemR Irregular) = conjEnding s "u"
+conjDictForm (JaVerbConjugation MiddleJapanese s@StemR Irregular) = conjEnding s "i"
+conjDictForm (JaVerbConjugation v s c) = error $ "conjDictForm: Unknown Verb Class " ++ show (v, s, c)
 
 conjEndings :: JaVerbConjugation -> [JaYomi]
 conjEndings (JaVerbConjugation v s c) = map (conjEnding s) $ conjSuffixes v s c

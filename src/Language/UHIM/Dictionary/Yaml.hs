@@ -252,3 +252,9 @@ extractJaPron _ = Nothing
 
 extractJaProns :: Pron -> [JaYomi]
 extractJaProns = map snd . extractJaPronList
+
+okurigana :: JaYomi -> WordConvPair
+okurigana s = WordConvPair
+  { word字 = KanjiShapes $ M.singleton jaKanjiKey "$$"
+  , word讀 = emptyPron { pron日送 = Just s }
+  }
