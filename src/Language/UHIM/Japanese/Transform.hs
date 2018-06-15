@@ -3,8 +3,10 @@ module Language.UHIM.Japanese.Transform where
 
 import Data.Semigroup
 
-import Language.UHIM.Japanese.Adjective
-import Language.UHIM.Japanese.Verb
+import Language.UHIM.Japanese.Adjective (JaAdjConjugation)
+import qualified Language.UHIM.Japanese.Adjective as Adj
+import Language.UHIM.Japanese.Verb (JaVerbConjugation)
+import qualified Language.UHIM.Japanese.Verb as Verb
 import Language.UHIM.Dictionary.Yaml
 
 data Config = Config
@@ -22,8 +24,10 @@ defaultConfig = Config
 appendEnding :: Config -> DictEntry -> DictEntry
 appendEnding _ d@(Entry字 _) = d
 appendEnding _ d@(Entry語 _) = d
-appendEnding c   (Entry日動詞 wd) = Entry日動詞 $ wd {jaVerb聯 = jaVerb聯 wd <> [okurigana (conjDictForm conj)] }
+appendEnding c   (Entry日動詞 wd) = Entry日動詞 $ wd {jaVerb聯 = jaVerb聯 wd <> [okurigana (Verb.conjDictForm conj)] }
   where
     conj = verbConjugationSelector c $ jaVerb類 wd
-appendEnding c d@(Entry日形容詞 wd) = d
+appendEnding c   (Entry日形容詞 wd) = Entry日形容詞 $ wd {jaAdj聯 = jaAdj聯 wd <> [okurigana (Adj.conjDictForm conj)] }
+  where
+    conj = adjConjugationSelector c $ jaAdj類 wd
 appendEnding _ d@(Entry日副詞 _) = d

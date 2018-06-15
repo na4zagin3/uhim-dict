@@ -7,6 +7,8 @@ import qualified Data.Map as M
 import Data.Map (Map)
 import Data.Aeson.Types hiding (parse)
 
+import Language.UHIM.Japanese.Prim (JaYomi(..))
+
 data JaAdjConjugation = JaAdjI | JaAdjKu
                       | JaAdjSii | JaAdjSiku
                       | JaAdjZii | JaAdjZiku
@@ -41,6 +43,18 @@ toSymbol JaAdjZiku = "ジク"
 toSymbol JaAdjNa = "ナ"
 toSymbol JaAdjNari = "ナリ"
 toSymbol JaAdjTari = "タリ"
+
+conjDictForm :: JaAdjConjugation -> JaYomi
+conjDictForm JaAdjI = NonChange "い"
+conjDictForm JaAdjKu = NonChange "し"
+conjDictForm JaAdjSii = NonChange "しい"
+conjDictForm JaAdjSiku = NonChange "し"
+conjDictForm JaAdjZii = NonChange "じい"
+conjDictForm JaAdjZiku = NonChange "じ"
+-- ToDo: Rethink about endings of those adjective classes
+conjDictForm JaAdjNa = mempty
+conjDictForm JaAdjNari = mempty
+conjDictForm JaAdjTari = mempty
 
 instance ToJSON JaAdjConjugation where
     toJSON jvc = toJSON $ toSymbol jvc
