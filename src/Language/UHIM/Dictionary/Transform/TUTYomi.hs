@@ -10,21 +10,7 @@ import Language.UHIM.Dictionary.Yaml
 import Language.UHIM.Dictionary.SKK.SKKExtended (SKKDict)
 import qualified Language.UHIM.Dictionary.SKK.SKKExtended as SKK
 
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Lazy as BL
-import qualified Data.Yaml as Y
-import qualified Data.Text as T
-import qualified Data.Map as M
-import Data.Map (Map)
-import qualified Data.List as L
-import Data.Monoid
-import Text.Parsec
-import GHC.Generics
--- import Control.Lens
 import Data.Maybe
-import Data.Aeson
-import Data.Aeson.TH
-import Data.Aeson.Types
 
 type KyuKana = String
 type ShinKana = String
@@ -78,22 +64,22 @@ expandConversion :: [(Kana, Kanji)] -> [String]
 expandConversion = drop 1 . map concat . combinatorial . map (\(x,y) -> [y,x])
 
 extractConvEntry :: ExtractConfig -> (Position, DictEntry) -> [ConvEntry]
-extractConvEntry c (pos, ent@(Entry字 decl)) = maybeToList pronConversion
+extractConvEntry c (_, ent@(Entry字 decl)) = maybeToList pronConversion
   where
     pronConversion = do
       let ys = concatMap extractJaProns $ kanji音 decl
       k <- kanjiExtractor c $ kanji體 decl
       return $ KanjiConversion k (mapMaybe (yomiExtractor c) ys) $ fromMaybe 1 $ frequency ent
 
-extractConvEntry c (pos, ent@(Entry語 decl)) = maybeToList $ do
+extractConvEntry c (_, ent@(Entry語 decl)) = maybeToList $ do
   kys <- mapM (extractWordConvPair c) $ word聯 decl
   return $ WordConversion kys $ fromMaybe 1 $ frequency ent
 
-extractConvEntry c (pos, ent@(Entry日副詞 decl)) = maybeToList $ do
+extractConvEntry c (_, ent@(Entry日副詞 decl)) = maybeToList $ do
   kys <- mapM (extractWordConvPair c) $ word聯 decl
   return $ WordConversion kys $ fromMaybe 1 $ frequency ent
 
-extractConvEntry c (pos, ent@(Entry日動詞 decl)) = f verbConvSuffixes iMark ++ f verbConvFinalSuffixes ""
+extractConvEntry c (_, ent@(Entry日動詞 decl)) = f verbConvSuffixes iMark ++ f verbConvFinalSuffixes ""
   where
     iMark = inflectionMark c
     f getSuffixes conjMark = do
@@ -103,7 +89,7 @@ extractConvEntry c (pos, ent@(Entry日動詞 decl)) = f verbConvSuffixes iMark +
       let okuri = if isRequiredOkurigana c decl then sufy else ""
       return $ VerbConversion kys (okuri, okuri ++ conjMark) $ fromMaybe 1 $ frequency ent
 
-extractConvEntry c (pos, ent@(Entry日形容詞 decl)) = do
+extractConvEntry c (_, ent@(Entry日形容詞 decl)) = do
   let iMark = inflectionMark c
   (suf, conj) <- map adjConvSuffixes $ jaAdj類 decl
   okuri <- mapMaybe (yomiExtractor c) suf
@@ -179,10 +165,3 @@ isRequiredOkurigana c decl = f $ jaVerb聯 decl
     f (_:xs) = f xs
     yomiExtractor' [x] = yomiExtractor c x
     yomiExtractor' _ = error $ "isRequiredOkurigana: Currently, only one pronunciation is allowed; but got: " ++ show decl
-
-nonOkuriganaMark :: String
-nonOkuriganaMark = "$"
-
-kanaMark :: String
-kanaMark = "$$"
-
