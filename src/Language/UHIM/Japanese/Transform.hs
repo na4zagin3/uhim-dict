@@ -1,11 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Language.UHIM.Japanese.Transform where
 
+import Data.List (sortBy)
+import Data.Ord (Down(..), comparing)
 import Data.Semigroup
 
-import Language.UHIM.Japanese.Adjective (JaAdjConjugation)
+import Language.UHIM.Japanese.Adjective (JaAdjConjugation(..))
 import qualified Language.UHIM.Japanese.Adjective as Adj
-import Language.UHIM.Japanese.Verb (JaVerbConjugation)
+import Language.UHIM.Japanese.Verb (JaVerbConjugation(..))
 import qualified Language.UHIM.Japanese.Verb as Verb
 import Language.UHIM.Dictionary.Yaml
 
@@ -14,11 +16,14 @@ data Config = Config
   , adjConjugationSelector :: [JaAdjConjugation] -> JaAdjConjugation
   }
 
+stableReorderBy :: (a -> Bool) -> [a] -> [a]
+stableReorderBy p xs = filter p xs <> filter (not . p) xs
+
 -- ToDo: Better default
 defaultConfig :: Config
 defaultConfig = Config
-  { verbConjugationSelector = head
-  , adjConjugationSelector = head
+  { verbConjugationSelector = head . stableReorderBy Verb.isClassicalVerbConjugation
+  , adjConjugationSelector = head . stableReorderBy Adj.isClassicalAdjConjugation
   }
 
 appendEnding :: Config -> DictEntry -> DictEntry

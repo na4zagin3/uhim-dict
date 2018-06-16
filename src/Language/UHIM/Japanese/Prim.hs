@@ -47,4 +47,4 @@ instance FromJSON JaYomi where
     parseJSON v          = typeMismatch "JaYomi" v
 
 data JaLanguageVariant = ModernStandardJapanese | MiddleJapanese
-    deriving (Eq, Ord, Show, Read)
+    deriving (Eq, Ord, Show, Read, Enum, Bounded)

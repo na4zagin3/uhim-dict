@@ -16,6 +16,14 @@ data JaAdjConjugation = JaAdjI | JaAdjKu
                       | JaAdjTari
     deriving (Eq, Ord, Show, Read)
 
+isClassicalAdjConjugation :: JaAdjConjugation -> Bool
+isClassicalAdjConjugation JaAdjKu = True
+isClassicalAdjConjugation JaAdjSiku = True
+isClassicalAdjConjugation JaAdjZiku = True
+isClassicalAdjConjugation JaAdjNari = True
+isClassicalAdjConjugation JaAdjTari = True
+isClassicalAdjConjugation _ = False
+
 jaAdjClasses :: Map String JaAdjConjugation
 jaAdjClasses = M.fromList ls
   where

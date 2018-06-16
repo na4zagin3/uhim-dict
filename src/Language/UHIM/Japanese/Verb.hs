@@ -23,10 +23,14 @@ data JaVerbStem = StemZero
                 | StemY
                 | StemR
                 | StemW
-    deriving (Eq, Ord, Show, Read)
+    deriving (Eq, Ord, Show, Read, Enum, Bounded)
 
 data JaVerbClass = Quinquegrade | Quadrigrade | SuperMonograde | SuperBigrade | SubMonograde | SubBigrade | Irregular
-    deriving (Eq, Ord, Show, Read)
+    deriving (Eq, Ord, Show, Read, Enum, Bounded)
+
+isClassicalVerbConjugation :: JaVerbConjugation -> Bool
+isClassicalVerbConjugation (JaVerbConjugation MiddleJapanese _ _) = True
+isClassicalVerbConjugation _ = False
 
 jaVerbClasses :: Map String JaVerbConjugation
 jaVerbClasses = M.fromList $ do
