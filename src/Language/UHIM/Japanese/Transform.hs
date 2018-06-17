@@ -1,8 +1,8 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Language.UHIM.Japanese.Transform where
 
-import Data.List (sortBy)
-import Data.Ord (Down(..), comparing)
+import Control.Lens
 import Data.Semigroup
 
 import Language.UHIM.Japanese.Adjective (JaAdjConjugation(..))
@@ -29,10 +29,12 @@ defaultConfig = Config
 appendEnding :: Config -> DictEntry -> DictEntry
 appendEnding _ d@(Entry字 _) = d
 appendEnding _ d@(Entry語 _) = d
-appendEnding c   (Entry日動詞 wd) = Entry日動詞 $ wd {jaVerb聯 = jaVerb聯 wd <> [okurigana (Verb.conjDictForm conj)] }
+appendEnding c   (Entry日動詞 wd) = Entry日動詞 $ wd & decl聯 %~ (<> [okurigana okuri])
   where
-    conj = verbConjugationSelector c $ jaVerb類 wd
-appendEnding c   (Entry日形容詞 wd) = Entry日形容詞 $ wd {jaAdj聯 = jaAdj聯 wd <> [okurigana (Adj.conjDictForm conj)] }
+    conj = verbConjugationSelector c $ wd^.decl類
+    okuri = Verb.conjDictForm conj
+appendEnding c   (Entry日形容詞 wd) = Entry日形容詞 $ wd & decl聯 %~ (<> [okurigana okuri])
   where
-    conj = adjConjugationSelector c $ jaAdj類 wd
+    conj = adjConjugationSelector c $ wd^.decl類
+    okuri = Adj.conjDictForm conj
 appendEnding _ d@(Entry日副詞 _) = d

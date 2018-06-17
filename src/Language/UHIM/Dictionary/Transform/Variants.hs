@@ -8,6 +8,7 @@ import Language.UHIM.Dictionary.Yaml
 import Language.UHIM.Dictionary.SKK.SKKExtended (SKKDict)
 import qualified Language.UHIM.Dictionary.SKK.SKKExtended as SKK
 
+import Control.Lens
 import qualified Data.Map as M
 import Data.Maybe
 
@@ -33,7 +34,7 @@ revConvFrequency :: Double
 revConvFrequency = 1.0
 
 extractKanjiShapes :: (Position, DictEntry) -> Maybe (KanjiShapes, Double)
-extractKanjiShapes (_, ent@(Entry字 decl)) = Just (kanji體 decl, fromMaybe defaultFrequency $ frequency ent)
+extractKanjiShapes (_, ent@(Entry字 decl)) = Just (decl^.decl體, fromMaybe defaultFrequency $ frequency ent)
 extractKanjiShapes _ = Nothing
 
 expandKanjiShapes :: ExtractConfig -> (KanjiShapes, Double) -> [(Kana, Kanji, Double)]

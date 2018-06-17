@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Language.UHIM.Dictionary.Transform.TUTYomi where
@@ -10,6 +11,7 @@ import Language.UHIM.Dictionary.Yaml
 import Language.UHIM.Dictionary.SKK.SKKExtended (SKKDict)
 import qualified Language.UHIM.Dictionary.SKK.SKKExtended as SKK
 
+import Control.Lens
 import Data.Maybe
 
 type KyuKana = String
@@ -67,33 +69,33 @@ extractConvEntry :: ExtractConfig -> (Position, DictEntry) -> [ConvEntry]
 extractConvEntry c (_, ent@(Entry字 decl)) = maybeToList pronConversion
   where
     pronConversion = do
-      let ys = concatMap extractJaProns $ kanji音 decl
-      k <- kanjiExtractor c $ kanji體 decl
+      let ys = concatMap extractJaProns $ decl^.decl音
+      k <- kanjiExtractor c $ decl^.decl體
       return $ KanjiConversion k (mapMaybe (yomiExtractor c) ys) $ fromMaybe 1 $ frequency ent
 
 extractConvEntry c (_, ent@(Entry語 decl)) = maybeToList $ do
-  kys <- mapM (extractWordConvPair c) $ word聯 decl
+  kys <- mapM (extractWordConvPair c) $ decl^.decl聯
   return $ WordConversion kys $ fromMaybe 1 $ frequency ent
 
 extractConvEntry c (_, ent@(Entry日副詞 decl)) = maybeToList $ do
-  kys <- mapM (extractWordConvPair c) $ word聯 decl
+  kys <- mapM (extractWordConvPair c) $ decl^.decl聯
   return $ WordConversion kys $ fromMaybe 1 $ frequency ent
 
 extractConvEntry c (_, ent@(Entry日動詞 decl)) = f verbConvSuffixes iMark ++ f verbConvFinalSuffixes ""
   where
     iMark = inflectionMark c
     f getSuffixes conjMark = do
-      suf <- map getSuffixes $ jaVerb類 decl
+      suf <- map getSuffixes $ decl^.decl類
       sufy <- mapMaybe (yomiExtractor c) suf
-      kys <- maybeToList . mapM (extractVerbWordConvPair c sufy) $ jaVerb聯 decl
+      kys <- maybeToList . mapM (extractVerbWordConvPair c sufy) $ decl^.decl聯
       let okuri = if isRequiredOkurigana c decl then sufy else ""
       return $ VerbConversion kys (okuri, okuri ++ conjMark) $ fromMaybe 1 $ frequency ent
 
 extractConvEntry c (_, ent@(Entry日形容詞 decl)) = do
   let iMark = inflectionMark c
-  (suf, conj) <- map adjConvSuffixes $ jaAdj類 decl
+  (suf, conj) <- map adjConvSuffixes $ decl^.decl類
   okuri <- mapMaybe (yomiExtractor c) suf
-  kys <- maybeToList . mapM (extractVerbWordConvPair c okuri) $ jaAdj聯 decl
+  kys <- maybeToList . mapM (extractVerbWordConvPair c okuri) $ decl^.decl聯
   return $ VerbConversion kys (okuri, okuri ++ if conj then iMark else "") $ fromMaybe 1 $ frequency ent
 
 extractWordConvPair :: ExtractConfig -> WordConvPair -> Maybe (Kanji, Kana)
@@ -158,10 +160,10 @@ verbConvFinalSuffixes (JaVerbConjugation MiddleJapanese StemR Irregular) = [NonC
 verbConvFinalSuffixes jvc = conjEndings jvc
 
 isRequiredOkurigana :: ExtractConfig -> JaVerbDeclaration -> Bool
-isRequiredOkurigana c decl = f $ jaVerb聯 decl
+isRequiredOkurigana c decl = f $ decl^.decl聯
   where
     f [] = error $ "isRequiredOkurigana: No yomi definitions: " ++ show decl
-    f [cp] = (yomiExtractor' . extractJaProns $ word讀 cp) /= Just nonOkuriganaMark
+    f [cp] = (yomiExtractor' . extractJaProns $ cp^.decl讀) /= Just nonOkuriganaMark
     f (_:xs) = f xs
     yomiExtractor' [x] = yomiExtractor c x
     yomiExtractor' _ = error $ "isRequiredOkurigana: Currently, only one pronunciation is allowed; but got: " ++ show decl

@@ -1,31 +1,24 @@
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE Rank2Types #-}
 module Language.UHIM.Dictionary.Yaml where
 
-import qualified Data.Text as T
+import Control.Lens
+import Control.Lens.TH ()
+import Data.Aeson.TH
+import Data.Aeson.Types (FromJSON, ToJSON, Value(..), pairs, parseJSON, typeMismatch)
+import qualified Data.Aeson.Types as AE
+import qualified Data.ByteString as BS
 import qualified Data.Map as M
 import Data.Map (Map)
--- import qualified Data.List as L
--- import qualified Data.Yaml as Y
--- import Data.Text (Text)
--- import Data.Vector (Vector)
--- import Data.HashMap
--- import Data.String
--- import Data.Char
--- import qualified Data.Aeson as J
+import qualified Data.Text as T
 import qualified Data.Yaml as Y
 import qualified Data.Yaml.Include as YI
-import qualified Data.ByteString as BS
--- import qualified Data.ByteString.UTF8 as BSU
-import qualified Data.ByteString.Lazy as BL
--- import qualified Data.ByteString.Lazy.UTF8 as BLU
-import Data.Aeson.TH
-import Data.Aeson.Types hiding (defaultOptions)
-import qualified Data.Aeson.Types as AE
--- import Data.Monoid
-import Data.Maybe
--- import Text.Parsec
 import GHC.Generics
 
 import Language.UHIM.Japanese.Prim
@@ -43,6 +36,7 @@ data Pron = Pron { pron日呉 :: Maybe JaYomi
                  }
     deriving (Eq, Ord, Show, Read)
 deriveJSON jsonOptions{fieldLabelModifier = drop 4} ''Pron
+makeLenses ''Pron
 
 emptyPron :: Pron
 emptyPron = Pron { pron日漢 = Nothing
@@ -58,7 +52,7 @@ data KanjiShapes = KanjiShapes (Map String String)
     deriving (Eq, Ord, Show, Read, Generic)
 
 instance ToJSON KanjiShapes where
-    toEncoding (KanjiShapes vks) = pairs . mconcat . map (\(k, v)-> T.pack k .= v) . M.toList $ vks
+    toEncoding (KanjiShapes vks) = pairs . mconcat . map (\(k, v)-> T.pack k AE..= v) . M.toList $ vks
 
 instance FromJSON KanjiShapes where
     parseJSON v@(Object _) = do
@@ -102,57 +96,63 @@ mukaeYomiKey = "日迎"
 deriveJSON defaultOptions ''KanjiShapes
 -}
 
-data KanjiDeclaration = KanjiDeclaration { kanji體 :: KanjiShapes
-                                         , kanji音 :: [Pron]
-                                         , kanji形 :: Maybe (Map String String)
-                                         , kanji義 :: Maybe [String]
-                                         , kanji鍵 :: Maybe (Map String String)
-                                         , kanji頻度 :: Maybe Double
-                                         , kanji簽 :: Maybe [String]
+data KanjiDeclaration = KanjiDeclaration { kanjiDeclarationDecl體 :: KanjiShapes
+                                         , kanjiDeclarationDecl音 :: [Pron]
+                                         , kanjiDeclarationDecl形 :: Maybe (Map String String)
+                                         , kanjiDeclarationDecl義 :: Maybe [String]
+                                         , kanjiDeclarationDecl鍵 :: Maybe (Map String String)
+                                         , kanjiDeclarationDecl頻度 :: Maybe Double
+                                         , kanjiDeclarationDecl簽 :: Maybe [String]
                                          }
     deriving (Eq, Ord, Show, Read)
-deriveJSON jsonOptions{fieldLabelModifier = drop 5} ''KanjiDeclaration
+deriveJSON jsonOptions{fieldLabelModifier = drop 20} ''KanjiDeclaration
+makeFields ''KanjiDeclaration
+
 emptyKanjiDeclaration :: KanjiDeclaration
-emptyKanjiDeclaration = KanjiDeclaration { kanji體 = KanjiShapes M.empty
-                                         , kanji音 = []
-                                         , kanji形 = Nothing
-                                         , kanji義 = Nothing
-                                         , kanji鍵 = Nothing
-                                         , kanji頻度 = Nothing
-                                         , kanji簽 = Nothing
+emptyKanjiDeclaration = KanjiDeclaration { kanjiDeclarationDecl體 = KanjiShapes M.empty
+                                         , kanjiDeclarationDecl音 = []
+                                         , kanjiDeclarationDecl形 = Nothing
+                                         , kanjiDeclarationDecl義 = Nothing
+                                         , kanjiDeclarationDecl鍵 = Nothing
+                                         , kanjiDeclarationDecl頻度 = Nothing
+                                         , kanjiDeclarationDecl簽 = Nothing
                                          }
 
-data WordConvPair = WordConvPair { word字 :: KanjiShapes
-                                 , word讀 :: Pron
+data WordConvPair = WordConvPair { wordConvPairDecl字 :: KanjiShapes
+                                 , wordConvPairDecl讀 :: Pron
                                  }
     deriving (Eq, Ord, Show, Read)
-deriveJSON jsonOptions{fieldLabelModifier = drop 4} ''WordConvPair
+deriveJSON jsonOptions{fieldLabelModifier = drop 16} ''WordConvPair
+makeFields ''WordConvPair
 
-data WordDeclaration = WordDeclaration { word聯 :: [WordConvPair]
-                                       , word義 :: Maybe [String]
-                                       , word頻度 :: Maybe Double
-                                       , word簽 :: Maybe [String]
+data WordDeclaration = WordDeclaration { wordDeclarationDecl聯 :: [WordConvPair]
+                                       , wordDeclarationDecl義 :: Maybe [String]
+                                       , wordDeclarationDecl頻度 :: Maybe Double
+                                       , wordDeclarationDecl簽 :: Maybe [String]
                                        }
     deriving (Eq, Ord, Show, Read)
-deriveJSON jsonOptions{fieldLabelModifier = drop 4} ''WordDeclaration
+deriveJSON jsonOptions{fieldLabelModifier = drop 19} ''WordDeclaration
+makeFields ''WordDeclaration
 
-data JaVerbDeclaration = JaVerbDeclaration { jaVerb類 :: [JaVerbConjugation]
-                                           , jaVerb聯 :: [WordConvPair]
-                                           , jaVerb義 :: Maybe [String]
-                                           , jaVerb頻度 :: Maybe Double
-                                           , jaVerb簽 :: Maybe [String]
+data JaVerbDeclaration = JaVerbDeclaration { jaVerbDeclarationDecl類 :: [JaVerbConjugation]
+                                           , jaVerbDeclarationDecl聯 :: [WordConvPair]
+                                           , jaVerbDeclarationDecl義 :: Maybe [String]
+                                           , jaVerbDeclarationDecl頻度 :: Maybe Double
+                                           , jaVerbDeclarationDecl簽 :: Maybe [String]
                                            }
     deriving (Eq, Ord, Show, Read)
-deriveJSON jsonOptions{fieldLabelModifier = drop 6} ''JaVerbDeclaration
+deriveJSON jsonOptions{fieldLabelModifier = drop 21} ''JaVerbDeclaration
+makeFields ''JaVerbDeclaration
 
-data JaAdjDeclaration = JaAdjDeclaration { jaAdj類 :: [JaAdjConjugation]
-                                         , jaAdj聯 :: [WordConvPair]
-                                         , jaAdj義 :: Maybe [String]
-                                         , jaAdj頻度 :: Maybe Double
-                                         , jaAdj簽 :: Maybe [String]
+data JaAdjDeclaration = JaAdjDeclaration { jaAdjDeclarationDecl類 :: [JaAdjConjugation]
+                                         , jaAdjDeclarationDecl聯 :: [WordConvPair]
+                                         , jaAdjDeclarationDecl義 :: Maybe [String]
+                                         , jaAdjDeclarationDecl頻度 :: Maybe Double
+                                         , jaAdjDeclarationDecl簽 :: Maybe [String]
                                          }
     deriving (Eq, Ord, Show, Read)
-deriveJSON jsonOptions{fieldLabelModifier = drop 5} ''JaAdjDeclaration
+deriveJSON jsonOptions{fieldLabelModifier = drop 20} ''JaAdjDeclaration
+makeFields ''JaAdjDeclaration
 
 data DictEntry = Entry字 KanjiDeclaration
                | Entry語 WordDeclaration
@@ -161,6 +161,49 @@ data DictEntry = Entry字 KanjiDeclaration
                | Entry日副詞 WordDeclaration
     deriving (Show, Read, Eq, Ord)
 deriveJSON jsonOptions{constructorTagModifier = drop 5, sumEncoding = ObjectWithSingleField} ''DictEntry
+makePrisms ''DictEntry
+
+instance HasDecl義 DictEntry (Maybe [String]) where
+  decl義 = lens g s
+    where
+      g (Entry字 d) = d ^. decl義
+      g (Entry語 d) = d ^. decl義
+      g (Entry日動詞 d) = d ^. decl義
+      g (Entry日形容詞 d) = d ^. decl義
+      g (Entry日副詞 d) = d ^. decl義
+      s (Entry字 d) v = Entry字 $ d & decl義 .~ v
+      s (Entry語 d) v = Entry語 $ d & decl義 .~ v
+      s (Entry日動詞 d) v = Entry日動詞 $ d & decl義 .~ v
+      s (Entry日形容詞 d) v = Entry日形容詞 $ d & decl義 .~ v
+      s (Entry日副詞 d) v = Entry日副詞 $ d & decl義 .~ v
+
+instance HasDecl頻度 DictEntry (Maybe Double) where
+  decl頻度 = lens g s
+    where
+      g (Entry字 d) = d ^. decl頻度
+      g (Entry語 d) = d ^. decl頻度
+      g (Entry日動詞 d) = d ^. decl頻度
+      g (Entry日形容詞 d) = d ^. decl頻度
+      g (Entry日副詞 d) = d ^. decl頻度
+      s (Entry字 d) v = Entry字 $ d & decl頻度 .~ v
+      s (Entry語 d) v = Entry語 $ d & decl頻度 .~ v
+      s (Entry日動詞 d) v = Entry日動詞 $ d & decl頻度 .~ v
+      s (Entry日形容詞 d) v = Entry日形容詞 $ d & decl頻度 .~ v
+      s (Entry日副詞 d) v = Entry日副詞 $ d & decl頻度 .~ v
+
+instance HasDecl簽 DictEntry (Maybe [String]) where
+  decl簽 = lens g s
+    where
+      g (Entry字 d) = d ^. decl簽
+      g (Entry語 d) = d ^. decl簽
+      g (Entry日動詞 d) = d ^. decl簽
+      g (Entry日形容詞 d) = d ^. decl簽
+      g (Entry日副詞 d) = d ^. decl簽
+      s (Entry字 d) v = Entry字 $ d & decl簽 .~ v
+      s (Entry語 d) v = Entry語 $ d & decl簽 .~ v
+      s (Entry日動詞 d) v = Entry日動詞 $ d & decl簽 .~ v
+      s (Entry日形容詞 d) v = Entry日形容詞 $ d & decl簽 .~ v
+      s (Entry日副詞 d) v = Entry日副詞 $ d & decl簽 .~ v
 
 type Position = [(String, Integer)]
 
@@ -183,18 +226,18 @@ writeToBS :: Dictionary -> BS.ByteString
 writeToBS = Y.encode . map snd
 
 entryLabel :: DictEntry -> Maybe [String]
-entryLabel (Entry字 decl) = kanji簽 decl
-entryLabel (Entry語 decl) = word簽 decl
-entryLabel (Entry日動詞 decl) = jaVerb簽 decl
-entryLabel (Entry日形容詞 decl) = jaAdj簽 decl
-entryLabel (Entry日副詞 decl) = word簽 decl
+entryLabel (Entry字 decl) = decl ^. decl簽
+entryLabel (Entry語 decl) = decl ^. decl簽
+entryLabel (Entry日動詞 decl) = decl ^. decl簽
+entryLabel (Entry日形容詞 decl) = decl ^. decl簽
+entryLabel (Entry日副詞 decl) = decl ^. decl簽
 
 frequency :: DictEntry -> Maybe Double
-frequency (Entry字 decl) = kanji頻度 decl
-frequency (Entry語 decl) = word頻度 decl
-frequency (Entry日動詞 decl) = jaVerb頻度 decl
-frequency (Entry日形容詞 decl) = jaAdj頻度 decl
-frequency (Entry日副詞 decl) = word頻度 decl
+frequency (Entry字 decl) = decl ^. decl頻度
+frequency (Entry語 decl) = decl ^. decl頻度
+frequency (Entry日動詞 decl) = decl ^. decl頻度
+frequency (Entry日形容詞 decl) = decl ^. decl頻度
+frequency (Entry日副詞 decl) = decl ^. decl頻度
 
 -- Utils
 convExtToTrad :: Char -> Char
@@ -255,8 +298,8 @@ extractJaProns = map snd . extractJaPronList
 
 okurigana :: JaYomi -> WordConvPair
 okurigana s = WordConvPair
-  { word字 = KanjiShapes $ M.singleton jaKanjiKey kanaMark
-  , word讀 = emptyPron { pron日送 = Just s }
+  { wordConvPairDecl字 = KanjiShapes $ M.singleton jaKanjiKey kanaMark
+  , wordConvPairDecl讀 = emptyPron { pron日送 = Just s }
   }
 
 nonOkuriganaMark :: String

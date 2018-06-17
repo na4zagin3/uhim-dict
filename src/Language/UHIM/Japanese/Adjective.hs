@@ -14,7 +14,7 @@ data JaAdjConjugation = JaAdjI | JaAdjKu
                       | JaAdjZii | JaAdjZiku
                       | JaAdjNa | JaAdjNari
                       | JaAdjTari
-    deriving (Eq, Ord, Show, Read)
+    deriving (Eq, Ord, Show, Read, Enum, Bounded)
 
 isClassicalAdjConjugation :: JaAdjConjugation -> Bool
 isClassicalAdjConjugation JaAdjKu = True

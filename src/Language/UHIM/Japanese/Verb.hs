@@ -11,7 +11,7 @@ import Data.Aeson.Types hiding (parse)
 import Language.UHIM.Japanese.Prim
 
 data JaVerbConjugation = JaVerbConjugation JaLanguageVariant JaVerbStem JaVerbClass
-    deriving (Eq, Ord, Show, Read)
+    deriving (Eq, Ord, Show, Read, Bounded)
 
 data JaVerbStem = StemZero
                 | StemK | StemG

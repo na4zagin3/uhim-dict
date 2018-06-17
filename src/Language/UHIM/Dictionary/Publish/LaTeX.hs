@@ -8,6 +8,7 @@ import Language.UHIM.Japanese.Prim
 import Language.UHIM.Japanese.Verb as JV
 import Language.UHIM.Japanese.Adjective as JA
 import Language.UHIM.Dictionary.Yaml
+import Control.Lens
 import Data.Either
 import Data.String
 import Data.List
@@ -35,9 +36,9 @@ emitHeadKanjiShapes (KanjiShapes ks) = fromString . unwords $ map (uncurry emitH
     maps = sort . map (first readShapeKey) $ M.toList ks
 
 headWordKanji :: (IsString s) => (JaYomi -> Maybe Kana) -> (KanjiShapes -> Maybe Kanji) -> WordConvPair -> s
-headWordKanji extYomi extKanji kp = fromString . f kanji . extractYomi . extractJaProns $ word讀 kp
+headWordKanji extYomi extKanji kp = fromString . f kanji . extractYomi . extractJaProns $ kp^.decl讀
   where
-    kanji = fromMaybe "" $ extKanji $ word字 kp
+    kanji = fromMaybe "" $ extKanji $ kp^.decl字
     f k Nothing = k
     f "$$" (Just y) = y
     f k (Just y) = "\\ruby{" ++ escape k ++ "}{" ++ escape y ++ "}"
@@ -153,17 +154,17 @@ emitEntry :: (IsString s, Monoid s, Eq s) => Config -> (Position, DictEntry) -> 
 emitEntry c (pos, d@(Entry字 decl)) = mconcat
   [ emitPosition pos
   , "%\n"
-  , emitHeadKanjiShapes $ kanji體 decl
+  , emitHeadKanjiShapes $ decl^.decl體
   , "%\n"
   , emitFrequency c $ frequency d
   , "%\n"
-  , fromMaybe "" (emitShapes c <$> kanji形 decl)
+  , fromMaybe "" (emitShapes c <$> decl^.decl形)
   , "%\n"
-  , fromMaybe "" (emitKeys c <$> kanji鍵 decl)
+  , fromMaybe "" (emitKeys c <$> decl^.decl鍵)
   , "%\n"
-  , kanjiYomi c $ kanji音 decl
+  , kanjiYomi c $ decl^.decl音
   , "%\n"
-  , fromMaybe "" (meaning c <$> kanji義 decl)
+  , fromMaybe "" (meaning c <$> decl^.decl義)
   , "%\n"
   , fromMaybe "" (tags c <$> entryLabel d)
   ]
@@ -171,11 +172,11 @@ emitEntry c (pos, d@(Entry字 decl)) = mconcat
 emitEntry c (pos, d@(Entry語 decl)) = mconcat
   [ emitPosition pos
   , "%\n"
-  , mconcat $ headWord "語" $ word聯 decl
+  , mconcat $ headWord "語" $ decl^.decl聯
   , "%\n"
   , emitFrequency c $ frequency d
   , "%\n"
-  , fromMaybe "" (meaning c <$> word義 decl)
+  , fromMaybe "" (meaning c <$> decl^.decl義)
   , "%\n"
   , fromMaybe "" (tags c <$> entryLabel d)
   ]
@@ -183,11 +184,11 @@ emitEntry c (pos, d@(Entry語 decl)) = mconcat
 emitEntry c (pos, d@(Entry日副詞 decl)) = mconcat
   [ emitPosition pos
   , "%\n"
-  , mconcat $ headWord "日副詞" $ word聯 decl
+  , mconcat $ headWord "日副詞" $ decl^.decl聯
   , "%\n"
   , emitFrequency c $ frequency d
   , "%\n"
-  , fromMaybe "" (meaning c <$> word義 decl)
+  , fromMaybe "" (meaning c <$> decl^.decl義)
   , "%\n"
   , fromMaybe "" (tags c <$> entryLabel d)
   ]
@@ -195,13 +196,13 @@ emitEntry c (pos, d@(Entry日副詞 decl)) = mconcat
 emitEntry c (pos, d@(Entry日動詞 decl)) = mconcat
   [ emitPosition pos
   , "%\n"
-  , mconcat $ headWord "日動詞" $ jaVerb聯 decl
+  , mconcat $ headWord "日動詞" $ decl^.decl聯
   , "%\n"
-  , verbConj $ jaVerb類 decl
+  , verbConj $ decl^.decl類
   , "%\n"
   , emitFrequency c $ frequency d
   , "%\n"
-  , fromMaybe "" (meaning c <$> jaVerb義 decl)
+  , fromMaybe "" (meaning c <$> decl^.decl義)
   , "%\n"
   , fromMaybe "" (tags c <$> entryLabel d)
   ]
@@ -209,13 +210,13 @@ emitEntry c (pos, d@(Entry日動詞 decl)) = mconcat
 emitEntry c (pos, d@(Entry日形容詞 decl)) = mconcat
   [ emitPosition pos
   , "%\n"
-  , mconcat $ headWord "日形容詞" $ jaAdj聯 decl
+  , mconcat $ headWord "日形容詞" $ decl^.decl聯
   , "%\n"
-  , adjConj $ jaAdj類 decl
+  , adjConj $ decl^.decl類
   , "%\n"
   , emitFrequency c $ frequency d
   , "%\n"
-  , fromMaybe "" (meaning c <$> jaAdj義 decl)
+  , fromMaybe "" (meaning c <$> decl^.decl義)
   , "%\n"
   , fromMaybe "" (tags c <$> entryLabel d)
   ]
@@ -262,7 +263,7 @@ escapeChar escapeSpace = (oneOf "$%#{}&^" >>= \c -> return ("\\" ++ [c])) <|> (c
 
 escapeHandakuten :: (Stream s m Char) => ParsecT s u m String
 escapeHandakuten = try $ do
-  c <- noneOf "ハヒフヘホ"
+  c <- P.noneOf "ハヒフヘホ"
   _ <- string "\x309a"
   return $ "{\\bou{" ++ [c] ++ "}}"
 

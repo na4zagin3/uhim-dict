@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 31f0cb038609cd6618cbec0117ce42d5dee1bfe6c08c57f138c9578bf263b7e7
+-- hash: 2c5103747188f9669166df0c3606fd247d7e2f8c0fe20b0ed75ba9994700d0f5
 
 name:           uhim-dict
 version:        0.1.0.0
@@ -96,6 +96,7 @@ test-suite uhim-dict-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Language.UHIM.Dictionary.YamlSpec
       Language.UHIM.Japanese.CollatorSpec
       Language.UHIM.Japanese.PrimSpec
       Language.UHIM.Japanese.TransformSpec

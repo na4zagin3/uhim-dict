@@ -1,5 +1,7 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Language.UHIM.Dictionary.Yaml.Comparator where
 
+import Control.Lens
 import Data.Function (on)
 import Data.Maybe
 
@@ -24,19 +26,20 @@ defaultConfig = Config { yomiExtractor = extractExtKyuKana
                        , kanaCollator = Col.japaneseCollator False
                        }
 
+-- ToDo: Rewrite with Prism
 extractYomi :: Config -> DictEntry -> String
 extractYomi _ (Entry字 _) = ""
-extractYomi c (Entry語 wd) = extractYomiFromWordConvPairs c $ word聯 wd
-extractYomi c (Entry日動詞 wd) = extractYomiFromWordConvPairs c $ jaVerb聯 wd
-extractYomi c (Entry日形容詞 wd) = extractYomiFromWordConvPairs c $ jaAdj聯 wd
-extractYomi c (Entry日副詞 wd) = extractYomiFromWordConvPairs c $ word聯 wd
+extractYomi c (Entry語 wd) = extractYomiFromWordConvPairs c $ wd^.decl聯
+extractYomi c (Entry日動詞 wd) = extractYomiFromWordConvPairs c $ wd^.decl聯
+extractYomi c (Entry日形容詞 wd) = extractYomiFromWordConvPairs c $ wd^.decl聯
+extractYomi c (Entry日副詞 wd) = extractYomiFromWordConvPairs c $ wd^.decl聯
 
 -- ToDo Support inflexion endings. (gh-63)
 extractYomiFromWordConvPairs :: Config -> [WordConvPair] -> String
 extractYomiFromWordConvPairs c wcs = mconcat . catMaybes $ map extractYomiFromWordConvPair wcs
   where
-    extractYomiFromWordConvPair wc = (extractJaPron $ word讀 wc) >>= yomiExtractor c >>= extractYomiFromWord wc
-    extractYomiFromWord wc "$" = kanjiExtractor c $ word字 wc
+    extractYomiFromWordConvPair wc = (extractJaPron $ wc^.decl讀) >>= yomiExtractor c >>= extractYomiFromWord wc
+    extractYomiFromWord wc "$" = kanjiExtractor c $ wc^.decl字
     extractYomiFromWord _ x = Just x
 
 

@@ -1,10 +1,11 @@
 module Language.UHIM.Dictionary.Transform.Tcvime where
 
+import Control.Lens
+import Data.Maybe
+import qualified Data.Map as M
 import Language.UHIM.Japanese.Prim
 import qualified Language.UHIM.Dictionary.Keybind.Vim as Vim
 import Language.UHIM.Dictionary.Yaml
-import Data.Maybe
-import qualified Data.Map as M
 
 data Config = Config { name :: String
                      , layoutName :: String
@@ -25,8 +26,8 @@ type KeyEntry = (String, String, String)
 
 extractConvEntry :: ExtractConfig -> String -> (Position, DictEntry) -> [Vim.Mapping]
 extractConvEntry c layout (pos, Entry字 decl) = maybeToList $ do
-  m <- kanji鍵 decl
-  kanji <- kanjiExtractor c $ kanji體 decl
+  m <- decl^.decl鍵
+  kanji <- kanjiExtractor c $ decl^.decl體
   k <- M.lookup layout m
   return $ Vim.Mapping k kanji $ show pos
 extractConvEntry _ _ _ = []

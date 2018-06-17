@@ -2,30 +2,19 @@
 {-# LANGUAGE DeriveGeneric #-}
 module Language.UHIM.Dictionary.Source.Jion where
 
-import Language.UHIM.Japanese.Prim
-import Language.UHIM.Japanese.Adjective
-import Language.UHIM.Japanese.Verb
-
 import Language.UHIM.Dictionary.Yaml
-import Language.UHIM.Dictionary.SKK.SKKExtended (SKKDict)
-import qualified Language.UHIM.Dictionary.SKK.SKKExtended as SKK
+import Language.UHIM.Japanese.Prim
 
-import qualified Data.ByteString as BS
+import Control.Lens
 import qualified Data.ByteString.Lazy as BL
-import qualified Data.Yaml as Y
-import qualified Data.Text as T
+import qualified Data.Csv as CSV
+import qualified Data.List as L
 import qualified Data.Map as M
 import Data.Map (Map)
-import qualified Data.List as L
-import Data.Monoid
-import Text.Parsec
-import GHC.Generics
--- import Control.Lens
-import Data.Maybe
-import Data.Aeson
-import qualified Data.Csv as CSV
 import Data.Vector (Vector)
 import qualified Data.Vector as V
+import GHC.Generics
+
 
 data JionEntry = JionEntry
   { shinKana :: String
@@ -72,9 +61,8 @@ emitEntry :: String -> [Yomi] -> DictEntry
 emitEntry k ys = Entry字 kd
   where
     ps = emitYomis . L.sort $ ys
-    kd = emptyKanjiDeclaration { kanji體 = ks
-                               , kanji音 = ps
-                               }
+    kd = emptyKanjiDeclaration & decl體 .~ ks
+                               & decl音 .~ ps
     ks = KanjiShapes (M.singleton jaKanjiKey k)
 
 
