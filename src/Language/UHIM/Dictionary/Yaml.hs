@@ -226,18 +226,10 @@ writeToBS :: Dictionary -> BS.ByteString
 writeToBS = Y.encode . map snd
 
 entryLabel :: DictEntry -> Maybe [String]
-entryLabel (Entry字 decl) = decl ^. decl簽
-entryLabel (Entry語 decl) = decl ^. decl簽
-entryLabel (Entry日動詞 decl) = decl ^. decl簽
-entryLabel (Entry日形容詞 decl) = decl ^. decl簽
-entryLabel (Entry日副詞 decl) = decl ^. decl簽
+entryLabel d = d ^. decl簽
 
 frequency :: DictEntry -> Maybe Double
-frequency (Entry字 decl) = decl ^. decl頻度
-frequency (Entry語 decl) = decl ^. decl頻度
-frequency (Entry日動詞 decl) = decl ^. decl頻度
-frequency (Entry日形容詞 decl) = decl ^. decl頻度
-frequency (Entry日副詞 decl) = decl ^. decl頻度
+frequency d = d ^. decl頻度
 
 -- Utils
 convExtToTrad :: Char -> Char

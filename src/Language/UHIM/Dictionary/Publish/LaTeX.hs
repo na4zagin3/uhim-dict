@@ -9,7 +9,6 @@ import Language.UHIM.Japanese.Verb as JV
 import Language.UHIM.Japanese.Adjective as JA
 import Language.UHIM.Dictionary.Yaml
 import Control.Lens
-import Data.Either
 import Data.String
 import Data.List
 import Data.Maybe
@@ -63,7 +62,7 @@ kanjiYomiElem (key, Changed n t) = mconcat [ "\\KanjiYomiElem{"
 
 kanjiYomi :: (IsString s, Monoid s, Eq s) => Config -> [Pron] -> s
 kanjiYomi _ [] = ""
-kanjiYomi c ps = if content == mempty
+kanjiYomi _ ps = if content == mempty
   then mempty
   else mconcat [ "\\begin{Yomi}\n"
                , content
@@ -128,8 +127,6 @@ headWord c wcp = concat [ ["\\HeadWord[", escape c, "]{"]
   where
     trad = map (headWordKanji extractExtKyuKana extractKyuKanji) wcp
     simp = map (headWordKanji extractShinKana extractShinKanji) wcp
-    maps :: [(ShapeClass, String)]
-    maps = sort . map (first readShapeKey) $ M.toList undefined
 
 verbConj :: (IsString s, Monoid s) => [JaVerbConjugation] -> s
 verbConj cs = mconcat [ "\\JaVerbConj{"
@@ -150,13 +147,20 @@ adjConj cs = mconcat [ "\\JaAdvConj{"
 emitPosition :: (IsString s, Monoid s, Eq s) => Position -> s
 emitPosition = mconcat . mconcat . map (\(f,p) -> [ "\\Position{", escape f, "}{", escape $ show p, "}"])
 
+emitFoot :: (HasDecl簽 s (Maybe [String]), HasDecl義 s (Maybe [String]), HasDecl頻度 s (Maybe Double), IsString a, Monoid a) => Config -> s -> a
+emitFoot c decl = mconcat
+  [ emitFrequency c $ decl^.decl頻度
+  , "%\n"
+  , fromMaybe "" (meaning c <$> decl^.decl義)
+  , "%\n"
+  , fromMaybe "" (tags c <$> decl^.decl簽)
+  ]
+
 emitEntry :: (IsString s, Monoid s, Eq s) => Config -> (Position, DictEntry) -> s
-emitEntry c (pos, d@(Entry字 decl)) = mconcat
+emitEntry c (pos, (Entry字 decl)) = mconcat
   [ emitPosition pos
   , "%\n"
   , emitHeadKanjiShapes $ decl^.decl體
-  , "%\n"
-  , emitFrequency c $ frequency d
   , "%\n"
   , fromMaybe "" (emitShapes c <$> decl^.decl形)
   , "%\n"
@@ -164,61 +168,43 @@ emitEntry c (pos, d@(Entry字 decl)) = mconcat
   , "%\n"
   , kanjiYomi c $ decl^.decl音
   , "%\n"
-  , fromMaybe "" (meaning c <$> decl^.decl義)
-  , "%\n"
-  , fromMaybe "" (tags c <$> entryLabel d)
+  , emitFoot c decl
   ]
 
-emitEntry c (pos, d@(Entry語 decl)) = mconcat
+emitEntry c (pos, (Entry語 decl)) = mconcat
   [ emitPosition pos
   , "%\n"
   , mconcat $ headWord "語" $ decl^.decl聯
   , "%\n"
-  , emitFrequency c $ frequency d
-  , "%\n"
-  , fromMaybe "" (meaning c <$> decl^.decl義)
-  , "%\n"
-  , fromMaybe "" (tags c <$> entryLabel d)
+  , emitFoot c decl
   ]
 
-emitEntry c (pos, d@(Entry日副詞 decl)) = mconcat
+emitEntry c (pos, (Entry日副詞 decl)) = mconcat
   [ emitPosition pos
   , "%\n"
   , mconcat $ headWord "日副詞" $ decl^.decl聯
   , "%\n"
-  , emitFrequency c $ frequency d
-  , "%\n"
-  , fromMaybe "" (meaning c <$> decl^.decl義)
-  , "%\n"
-  , fromMaybe "" (tags c <$> entryLabel d)
+  , emitFoot c decl
   ]
 
-emitEntry c (pos, d@(Entry日動詞 decl)) = mconcat
+emitEntry c (pos, (Entry日動詞 decl)) = mconcat
   [ emitPosition pos
   , "%\n"
   , mconcat $ headWord "日動詞" $ decl^.decl聯
   , "%\n"
   , verbConj $ decl^.decl類
   , "%\n"
-  , emitFrequency c $ frequency d
-  , "%\n"
-  , fromMaybe "" (meaning c <$> decl^.decl義)
-  , "%\n"
-  , fromMaybe "" (tags c <$> entryLabel d)
+  , emitFoot c decl
   ]
 
-emitEntry c (pos, d@(Entry日形容詞 decl)) = mconcat
+emitEntry c (pos, (Entry日形容詞 decl)) = mconcat
   [ emitPosition pos
   , "%\n"
   , mconcat $ headWord "日形容詞" $ decl^.decl聯
   , "%\n"
   , adjConj $ decl^.decl類
   , "%\n"
-  , emitFrequency c $ frequency d
-  , "%\n"
-  , fromMaybe "" (meaning c <$> decl^.decl義)
-  , "%\n"
-  , fromMaybe "" (tags c <$> entryLabel d)
+  , emitFoot c decl
   ]
 
 emitFilePaths :: (IsString s, Monoid s, Eq s) => [FilePath] -> s
@@ -259,7 +245,7 @@ escapeChar :: (Stream s m Char) => Bool -> ParsecT s u m String
 escapeChar escapeSpace = (oneOf "$%#{}&^" >>= \c -> return ("\\" ++ [c])) <|> (char '\\' >> return "\\textbackslash ") <|> escSpace
   where
     escSpace | escapeSpace = char ' ' >> return "\\textvisiblespace "
-             | not escapeSpace = parserZero
+             | otherwise = parserZero
 
 escapeHandakuten :: (Stream s m Char) => ParsecT s u m String
 escapeHandakuten = try $ do
