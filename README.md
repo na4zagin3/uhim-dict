@@ -1,5 +1,7 @@
 # UHIM Dict
 
+[![Build Status](https://travis-ci.com/na4zagin3/uhim-dict.svg?branch=master)](https://travis-ci.com/na4zagin3/uhim-dict)
+
 ## TUT-Code
 
 ### 交書変換辞書の生成
