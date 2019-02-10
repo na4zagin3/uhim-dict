@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2c5103747188f9669166df0c3606fd247d7e2f8c0fe20b0ed75ba9994700d0f5
+-- hash: d2239005be887c4a7382dc78743c653b9f6f95b2db2174858fec3306d71f621d
 
 name:           uhim-dict
 version:        0.1.0.0
@@ -51,9 +51,9 @@ library
   hs-source-dirs:
       src
   build-depends:
-      aeson >=0.11 && <1.3
+      aeson >=0.11 && <1.4
     , aeson-diff >=1.1 && <1.3
-    , base >=4.8 && <4.11
+    , base >=4.8 && <4.12
     , bytestring >=0.10 && <0.12
     , cassava >=0.4 && <0.6
     , containers >=0.5 && <0.6
@@ -75,9 +75,9 @@ executable uhim-dict
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      aeson >=0.11 && <1.3
+      aeson >=0.11 && <1.4
     , aeson-diff >=1.1 && <1.3
-    , base >=4.8 && <4.11
+    , base >=4.8 && <4.12
     , bytestring >=0.10 && <0.12
     , cassava >=0.4 && <0.6
     , containers >=0.5 && <0.6
@@ -105,9 +105,9 @@ test-suite uhim-dict-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      aeson >=0.11 && <1.3
+      aeson >=0.11 && <1.4
     , aeson-diff >=1.1 && <1.3
-    , base >=4.8 && <4.11
+    , base >=4.8 && <4.12
     , bytestring >=0.10 && <0.12
     , cassava >=0.4 && <0.6
     , containers >=0.5 && <0.6
